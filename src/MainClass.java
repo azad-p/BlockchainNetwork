@@ -1,7 +1,4 @@
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
-
-import java.io.*;
 import java.util.*;
 
 public class MainClass {
@@ -31,8 +28,9 @@ public class MainClass {
 		long totalTime = (endTime - startTime) / 1_000_000;
 		
 		System.out.println ("~~~~~~Performance Results~~~~~~~~~~");
+		System.out.println ("Note: Data is read & Linked together immediately after being read for improved efficiency.\n We do not read ALL data, and then link it together.");
 		System.out.println ("Milliseconds to load output file: " + timeOfOutputParsing + "ms (" + (timeOfOutputParsing * 0.001) + " s)");
-		System.out.println ("Milliseconds to load and link input file " + timeOfInputParsing + "ms (" + (timeOfInputParsing * 0.001) + " s)");
+		System.out.println ("Milliseconds to load input file and link it with output " + timeOfInputParsing + "ms (" + (timeOfInputParsing * 0.001) + " s)");
 		System.out.println ("Milliseconds of total execution: " + totalTime + "ms (" + (totalTime * 0.001) + " s)");
 		System.out.println ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}

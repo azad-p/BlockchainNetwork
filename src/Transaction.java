@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.Dictionary;
 
 public class Transaction extends GraphNode {

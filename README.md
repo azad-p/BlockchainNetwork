@@ -27,7 +27,7 @@ The folder used must be placed from inside BlockChainNetwork folder (relative pa
 
 In MainClass.java, near the top of the class a YEAR variable is given. Set its value equal to the year of the data-set you had chosen.
 
-The data-set is included in the .gitignore folder, so it MUST be added manually; with the exception of the 2009 data-set.
+The data-set is included in .gitignore, so it MUST be added manually; with the exception of the 2009 data-set.
 
 MainClass.java contains the main class. Located in the src folder.
 

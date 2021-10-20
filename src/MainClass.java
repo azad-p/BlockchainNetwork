@@ -1,13 +1,9 @@
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Scanner;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.util.*;
 import java.time.Instant;
-import java.util.Hashtable;
 
 public class MainClass {
 	
@@ -30,44 +26,43 @@ public class MainClass {
 		
 		if (time != -1)
 			newTrans.timeOfTransaction = time;
-		
-		String firstThreeChars = transHash.charAt(0) + "" + transHash.charAt(1) + transHash.charAt(2);
-		transactions.put(firstThreeChars, newTrans);
+
+		transactions.put(transHash, newTrans);
 		
 		return newTrans;
 	}
 
 	static Address addAddressToTable(Address address)
 	{
-		String hash = address.addrHash;
-
-		String firstThreeChars = hash.charAt(0) + "" + hash.charAt(1) + hash.charAt(2);
-		addresses.put(firstThreeChars, address);
+		addresses.put(address.addrHash, address);
 
 		return address;
 	}
 
 	static Transaction getTransFromTable (String transHash)
 	{
-		String firstThreeChars = transHash.charAt(0) + "" + transHash.charAt(1) + transHash.charAt(2);
-		Transaction trans = transactions.get(firstThreeChars);
-
-		return trans;
+		return transactions.get(transHash);
 	}
 
-	static void parseOutputFile (Graph graph)
+	static void parseOutputFiles (Graph graph)
 	{
 		int edgeCount = graph.getEdgeCount();
+		Scanner fileSc = null;
+		Scanner lineSc = null;
 
 		for (int i = 1; i <= 12; i++) {
 			try {
 				// Run through the input files for each month
-				Scanner sc = new Scanner(new File(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + i + ".txt"));
+				fileSc = new Scanner(new File(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + i + ".txt"));
 
-				while (sc.hasNextLine()) {
+				while (fileSc.hasNextLine()) {
+					String entireLine = fileSc.nextLine();
 
-					long time = sc.nextLong();
-					String transHash = sc.next();
+					// Parse the line
+					lineSc = new Scanner (entireLine);
+
+					long time = lineSc.nextLong();
+					String transHash = lineSc.next();
 
 					Transaction trans = getTransFromTable(transHash);
 
@@ -76,18 +71,28 @@ public class MainClass {
 						graph.addVertex(trans);
 					}
 
-					LinkedList <Address> addressesInOutput = new LinkedList<>();
+					Dictionary<Integer, Address> addressesInOutput = new Hashtable<>();
+					int indexOfOutput = 0;
 
 					// Create each address that is an output to this transaction
-					while (sc.hasNext())
+					while (lineSc.hasNext())
 					{
-						String addressHash = sc.next();
-						long amountSent = sc.nextLong();
+						String addressHash = lineSc.next();
+
+						// Do not store 'no address' hashes. Just use an empty string.
+						if (addressHash.charAt(0) == 'n')
+							addressHash = "";
+
+						long amountSent = lineSc.nextLong();
 
 						// Create address for output of the transaction
 						Address addr = new Address (amountSent, addressHash);
-						addressesInOutput.add(addr);
-						addAddressToTable(addr);
+						addr.sendee = trans;
+						addressesInOutput.put(indexOfOutput++, addr);
+
+						// Addresses with no hash are not added to our table
+						if (addressHash != "")
+							addAddressToTable(addr);
 
 						// Add information to the graph
 						graph.addVertex(addr);
@@ -96,84 +101,138 @@ public class MainClass {
 
 					// Add information to the transaction
 					trans.outputs = addressesInOutput;
+
+					lineSc.close();
+					lineSc = null;
 				}
+
+				fileSc.close();
+				fileSc = null;
 
 			} catch (IOException e) {
 				System.err.println("A problem has occurred");
+			} finally {
+				// If any scanner were not closed, close them
+				if (fileSc != null)
+					fileSc.close();
+				if (lineSc != null)
+					lineSc.close();
 			}
 		}
 	}
 
-	static void parseInputFile (Graph graph)
+	static void parseInputFiles (Graph graph)
 	{
 		int edgeCount = graph.getEdgeCount();
 
-		for (int i = 1; i <= 12; i++)
-		{
+		Scanner fileSc = null;
+		Scanner lineSc = null;
+
+		for (int i = 1; i <= 12; i++) {
 			try {
 				// Run through the input files for each month
-				Scanner sc = new Scanner (new File (FILE_FOLDER + '/' + INPUT_FILE_NAME + i + ".txt"));
+				fileSc = new Scanner(new File(FILE_FOLDER + '/' + INPUT_FILE_NAME + i + ".txt"));
 
-				while (sc.hasNext())
-				{
-					long transactionTime = sc.nextLong();
-					Instant instant = Instant.ofEpochSecond(transactionTime);
+				while (fileSc.hasNextLine()) {
+					String entireLine = fileSc.nextLine();
 
-					System.out.println (instant + " Month: " + i);
+					// Parse the line
+					lineSc = new Scanner(entireLine);
 
-					String transactionHash = sc.next();
-					Transaction nextTrans = null;
+					long transactionTime = lineSc.nextLong();
+					String transactionHash = lineSc.next();
+					Transaction nextTrans = getTransFromTable(transactionHash);
 
-					if (transactions.containsValue(transactionHash))
-					{
+					if (nextTrans != null) {
 						// Transaction is already in the hashTable
 						// Just update any of its information
-						nextTrans = transactions.get(transactionHash);
 						nextTrans.timeOfTransaction = transactionTime;
-					}
-					else
-					{
+					} else {
 						// Transaction is not in the Hashtable
 						// Create the class, update any of its information, and add it to the Hashtable
-						nextTrans = addTransactionToTable (transactionTime, transactionHash);
+						nextTrans = addTransactionToTable(transactionTime, transactionHash);
 						graph.addVertex(nextTrans);
 					}
 
 					// Check all of the transactions inputs
-					while (sc.hasNext())
-					{
-						String inputHash = sc.next();
-						int indexOfInput = sc.nextInt();
+					while (lineSc.hasNext()) {
+						String inputHash = lineSc.next();
+						int indexOfInput = lineSc.nextInt();
 
-						Transaction inputTrans = null;
+						Transaction inputTrans = getTransFromTable(inputHash);
 
-						if (transactions.containsValue (inputHash))
-						{
+						if (inputTrans != null) {
 							// Transaction is already in the hashTable
 							// Link them together via reference from hashTable
-							inputTrans = transactions.get (inputHash);
-							//inputTrans.connections.put(indexOfInput, null);
-							graph.addEdge (edgeCount, inputTrans, nextTrans);
-						}
-						else
-						{
+							inputTrans = transactions.get(inputHash);
+
+						} else {
 							// Transaction is not in the Hashtable
 							// Create the class, update any of its information, and add it to the Hashtable
 							// Then link them together
-							inputTrans = addTransactionToTable (-1, inputHash);
+							inputTrans = addTransactionToTable(-1, inputHash);
 							graph.addVertex(inputTrans);
-							graph.addEdge(edgeCount, inputTrans, nextTrans);
 						}
+
+						/*
+						System.out.println ("~Input Trans info~");
+						System.out.println (inputTrans.hashOfTransaction);
+						System.out.println (indexOfInput);
+						if (inputTrans.outputs != null) System.out.println (inputTrans.outputs.size());*/
+
+						Address address = null;
+
+						if (inputTrans.outputs == null)
+						{
+							// Special case
+							// Address was not found in the output files for this year
+							// Create a dummy address to mimick the transaction. Note that, the btc will not be known
+
+							Address dummyAddress = Address.createDummyAddress(inputTrans, nextTrans, indexOfInput, YEAR);
+
+							Dictionary<Integer, Address> outputs = new Hashtable<>();
+							outputs.put(indexOfInput, dummyAddress);
+							inputTrans.outputs = outputs;
+							address = dummyAddress;
+						}
+						else {
+							// Fail
+							// This may be a case where the output occured in a different year, but we already created the outputs dictionary
+							if (inputTrans.outputs.get(indexOfInput) == null)
+							{
+								System.out.println (".. Placing an output to an address that already existed..");
+
+								Address dummyAddress = Address.createDummyAddress(inputTrans, nextTrans, indexOfInput, YEAR);
+								inputTrans.outputs.put(indexOfInput, dummyAddress);
+								address = dummyAddress;
+							}
+
+							address = inputTrans.outputs.get(indexOfInput);
+						}
+
+						if (address == null) { System.err.println ("ERROR: Assertion ran. No address associated with the transaction."); System.exit(0); }
+
+						graph.addEdge(edgeCount++, inputTrans, address);
+						graph.addEdge(edgeCount++, address, nextTrans);
+						// address.sendee = inputTrans; Should not need to be written
+						address.receivee = nextTrans;
 					}
 
-					// Skip to next line
-					sc.nextLine();
+					lineSc.close();
+					lineSc = null;
 				}
-			} catch (FileNotFoundException e) {
 
-				System.err.println ("File could not be found.");
-				e.printStackTrace();
+				fileSc.close();
+				fileSc = null;
 
+			} catch (IOException e) {
+				System.err.println("A problem has occurred");
+			} finally {
+				// If any scanner were not closed, close them
+				if (fileSc != null)
+					fileSc.close();
+				if (lineSc != null)
+					lineSc.close();
 			}
 		}
 	}
@@ -182,6 +241,10 @@ public class MainClass {
 
 		Graph<Transaction, Integer> bitcoinNetwork = new DirectedSparseGraph<>();
 
-		parseOutputFile (bitcoinNetwork);
+		// Assumption: Output addresses are initialized before going through the input file
+		parseOutputFiles (bitcoinNetwork);
+		parseInputFiles (bitcoinNetwork);
+		System.out.println(transactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").outputs.get(0));
+
 	}
 }

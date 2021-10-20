@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -45,16 +47,19 @@ public class FileParser {
 	private void parseOutputFiles ()
 	{
 		int edgeCount = graph.getEdgeCount();
-		Scanner fileSc = null;
+		BufferedReader fileSc = null;
 		Scanner lineSc = null;
+		FileReader reader = null;
 
 		for (int i = 1; i <= 12; i++) {
 			try {
 				// Run through the input files for each month
-				fileSc = new Scanner(new File(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + i + ".txt"));
-
-				while (fileSc.hasNextLine()) {
-					String entireLine = fileSc.nextLine();
+				reader = new FileReader(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + i + ".txt");
+				fileSc = new BufferedReader(reader);
+				String inputLine = null;
+				
+				while ((inputLine = fileSc.readLine()) != null) {
+					String entireLine = inputLine;
 
 					// Parse the line
 					lineSc = new Scanner (entireLine);
@@ -112,9 +117,24 @@ public class FileParser {
 			} finally {
 				// If any scanner were not closed, close them
 				if (fileSc != null)
-					fileSc.close();
+					try {
+						fileSc.close();
+					} catch (IOException e) {
+						System.err.println ("A problem occurred with reading the files");
+						e.printStackTrace();
+						System.exit(0);
+					}
 				if (lineSc != null)
 					lineSc.close();
+				
+				if (reader != null)
+					try {
+						reader.close();
+					} catch (IOException e) {
+						System.err.println ("A problem occurred with reading the files");
+						e.printStackTrace();
+						System.exit(0);
+					}
 			}
 		}
 	}
@@ -122,17 +142,19 @@ public class FileParser {
 	private void parseInputFiles ()
 	{
 		int edgeCount = graph.getEdgeCount();
-
-		Scanner fileSc = null;
+		BufferedReader fileSc = null;
 		Scanner lineSc = null;
+		FileReader reader = null;
 
 		for (int i = 1; i <= 12; i++) {
 			try {
 				// Run through the input files for each month
-				fileSc = new Scanner(new File(FILE_FOLDER + '/' + INPUT_FILE_NAME + i + ".txt"));
-
-				while (fileSc.hasNextLine()) {
-					String entireLine = fileSc.nextLine();
+				reader = new FileReader(FILE_FOLDER + '/' + INPUT_FILE_NAME + i + ".txt");
+				fileSc = new BufferedReader(reader);
+				String inputLine = null;
+				
+				while ((inputLine = fileSc.readLine()) != null) {
+					String entireLine = inputLine;
 
 					// Parse the line
 					lineSc = new Scanner(entireLine);
@@ -223,12 +245,28 @@ public class FileParser {
 
 			} catch (IOException e) {
 				System.err.println("A problem has occurred");
+				System.exit(0);
 			} finally {
 				// If any scanner were not closed, close them
 				if (fileSc != null)
-					fileSc.close();
+					try {
+						fileSc.close();
+					} catch (IOException e) {
+						System.err.println ("A problem occurred with reading the files");
+						e.printStackTrace();
+						System.exit(0);
+					}
 				if (lineSc != null)
 					lineSc.close();
+				
+				if (reader != null)
+					try {
+						reader.close();
+					} catch (IOException e) {
+						System.err.println ("A problem occurred with reading the files");
+						e.printStackTrace();
+						System.exit(0);
+					}
 			}
 		}
 	}

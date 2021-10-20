@@ -22,10 +22,10 @@ public class MainClass {
 		Transaction newTrans = new Transaction();
 		
 		// Update transactions inputs
-		newTrans.hashOfTransaction = transHash;
+		newTrans.setHashOfTransaction(transHash);
 		
 		if (time != -1)
-			newTrans.timeOfTransaction = time;
+			newTrans.setTimeOfTransaction(time);
 
 		transactions.put(transHash, newTrans);
 		
@@ -34,7 +34,7 @@ public class MainClass {
 
 	static Address addAddressToTable(Address address)
 	{
-		addresses.put(address.addrHash, address);
+		addresses.put(address.getAddrHash(), address);
 
 		return address;
 	}
@@ -87,7 +87,7 @@ public class MainClass {
 
 						// Create address for output of the transaction
 						Address addr = new Address (amountSent, addressHash);
-						addr.sendee = trans;
+						addr.setSendee(trans);
 						addressesInOutput.put(indexOfOutput++, addr);
 
 						// Addresses with no hash are not added to our table
@@ -100,7 +100,7 @@ public class MainClass {
 					}
 
 					// Add information to the transaction
-					trans.outputs = addressesInOutput;
+					trans.setOutputs (addressesInOutput);
 
 					lineSc.close();
 					lineSc = null;
@@ -146,7 +146,7 @@ public class MainClass {
 					if (nextTrans != null) {
 						// Transaction is already in the hashTable
 						// Just update any of its information
-						nextTrans.timeOfTransaction = transactionTime;
+						nextTrans.setTimeOfTransaction(transactionTime);
 					} else {
 						// Transaction is not in the Hashtable
 						// Create the class, update any of its information, and add it to the Hashtable
@@ -182,7 +182,7 @@ public class MainClass {
 
 						Address address = null;
 
-						if (inputTrans.outputs == null)
+						if (inputTrans.getOutputs() == null)
 						{
 							// Special case
 							// Address was not found in the output files for this year
@@ -192,22 +192,22 @@ public class MainClass {
 
 							Dictionary<Integer, Address> outputs = new Hashtable<>();
 							outputs.put(indexOfInput, dummyAddress);
-							inputTrans.outputs = outputs;
+							inputTrans.setOutputs(outputs);
 							address = dummyAddress;
 						}
 						else {
 							// Fail
 							// This may be a case where the output occured in a different year, but we already created the outputs dictionary
-							if (inputTrans.outputs.get(indexOfInput) == null)
+							if (inputTrans.getOutputs().get(indexOfInput) == null)
 							{
 								System.out.println (".. Placing an output to an address that already existed..");
 
 								Address dummyAddress = Address.createDummyAddress(inputTrans, nextTrans, indexOfInput, YEAR);
-								inputTrans.outputs.put(indexOfInput, dummyAddress);
+								inputTrans.getOutputs().put(indexOfInput, dummyAddress);
 								address = dummyAddress;
 							}
 
-							address = inputTrans.outputs.get(indexOfInput);
+							address = inputTrans.getOutputs().get(indexOfInput);
 						}
 
 						if (address == null) { System.err.println ("ERROR: Assertion ran. No address associated with the transaction."); System.exit(0); }
@@ -215,7 +215,7 @@ public class MainClass {
 						graph.addEdge(edgeCount++, inputTrans, address);
 						graph.addEdge(edgeCount++, address, nextTrans);
 						// address.sendee = inputTrans; Should not need to be written
-						address.receivee = nextTrans;
+						address.setReceivee(nextTrans);
 					}
 
 					lineSc.close();
@@ -239,12 +239,12 @@ public class MainClass {
 	
 	public static void main(String[] args) {
 
-		Graph<Transaction, Integer> bitcoinNetwork = new DirectedSparseGraph<>();
+		Graph<GraphNode, Integer> bitcoinNetwork = new DirectedSparseGraph<>();
 
 		// Assumption: Output addresses are initialized before going through the input file
 		parseOutputFiles (bitcoinNetwork);
 		parseInputFiles (bitcoinNetwork);
-		System.out.println(transactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").outputs.get(0));
+		System.out.println(transactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").getOutputs().get(0));
 
 	}
 }

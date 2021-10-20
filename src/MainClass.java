@@ -8,14 +8,42 @@ public class MainClass {
 	
 	static final int YEAR = 2009;
 	
+	// Test & Outputs the performance for parser a bitcoin network dataset (Input / Output files)
+	// The parser goes through the output file first, then links the input files with the output files
+	static void performanceTest (FileParser parser)
+	{
+		long startTime = System.nanoTime();
+		
+		// Parse the output file, then link it with the input file
+		parser.parseOutput();
+		
+		long startTimeOfInputLink = System.nanoTime();
+		
+		parser.linkInputFileToOutputs();
+		
+		long endTime = System.nanoTime();
+		
+		// Note: The announcement is incorrect, this time should be divided by 1000000 NOT 1000
+		// 1,000,000 nanoseconds is 1 millisecond
+		long timeOfOutputParsing = (startTimeOfInputLink - startTime) / 1_000_000;
+		long timeOfInputParsing = (endTime - startTimeOfInputLink) / 1_000_000;
+		
+		long totalTime = (endTime - startTime) / 1_000_000;
+		
+		System.out.println ("~~~~~~Performance Results~~~~~~~~~~");
+		System.out.println ("Milliseconds to load output file: " + timeOfOutputParsing + "ms (" + (timeOfOutputParsing * 0.001) + " s)");
+		System.out.println ("Milliseconds to load and link input file " + timeOfInputParsing + "ms (" + (timeOfInputParsing * 0.001) + " s)");
+		System.out.println ("Milliseconds of total execution: " + totalTime + "ms (" + (totalTime * 0.001) + " s)");
+		System.out.println ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	}
+	
 	public static void main(String[] args) {
 
 		// Create the parser. Going through the dataset for a given year.
 		FileParser parser = new FileParser (YEAR);
 		
-		// Parse the output file, then link it with the input file
-		parser.parseOutput();
-		parser.linkInputFileToOutputs();
+		// Run a performance check
+		performanceTest (parser);
 		
 		// Fetch the results
 		Graph bitcoinNetwork = parser.getBitcoinNetwork();

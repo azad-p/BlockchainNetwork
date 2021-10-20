@@ -139,17 +139,17 @@ public class FileParser {
 
 					long transactionTime = lineSc.nextLong();
 					String transactionHash = lineSc.next();
-					Transaction nextTrans = getTransFromTable(transactionHash);
+					Transaction trans = getTransFromTable(transactionHash);
 
-					if (nextTrans != null) {
+					if (trans != null) {
 						// Transaction is already in the hashTable
 						// Just update any of its information
-						nextTrans.setTimeOfTransaction(transactionTime);
+						trans.setTimeOfTransaction(transactionTime);
 					} else {
 						// Transaction is not in the Hashtable
 						// Create the class, update any of its information, and add it to the Hashtable
-						nextTrans = addTransactionToTable(transactionTime, transactionHash);
-						graph.addVertex(nextTrans);
+						trans = addTransactionToTable(transactionTime, transactionHash);
+						graph.addVertex(trans);
 					}
 
 					// Check all of the transactions inputs
@@ -172,21 +172,14 @@ public class FileParser {
 							graph.addVertex(inputTrans);
 						}
 
-						/*
-						System.out.println ("~Input Trans info~");
-						System.out.println (inputTrans.hashOfTransaction);
-						System.out.println (indexOfInput);
-						if (inputTrans.outputs != null) System.out.println (inputTrans.outputs.size());*/
-
 						Address address = null;
-
 						if (inputTrans.getOutputs() == null)
 						{
 							// Special case
 							// Address was not found in the output files for this year
 							// Create a dummy address to mimic the transaction. Note that, the btc will not be known
 
-							Address dummyAddress = Address.createDummyAddress(inputTrans, nextTrans, indexOfInput, YEAR_OF_DATASET);
+							Address dummyAddress = Address.createDummyAddress(inputTrans, trans, indexOfInput, YEAR_OF_DATASET);
 
 							Dictionary<Integer, Address> outputs = new Hashtable<>();
 							outputs.put(indexOfInput, dummyAddress);
@@ -200,7 +193,7 @@ public class FileParser {
 							{
 								System.out.println (".. Placing an output to an address that already existed..");
 
-								Address dummyAddress = Address.createDummyAddress(inputTrans, nextTrans, indexOfInput, YEAR_OF_DATASET);
+								Address dummyAddress = Address.createDummyAddress(inputTrans, trans, indexOfInput, YEAR_OF_DATASET);
 								inputTrans.getOutputs().put(indexOfInput, dummyAddress);
 								address = dummyAddress;
 							}
@@ -210,10 +203,10 @@ public class FileParser {
 
 						if (address == null) { System.err.println ("ERROR: Assertion ran. No address associated with the transaction."); System.exit(0); }
 
+						// Link the information together
 						graph.addEdge(edgeCount++, inputTrans, address);
-						graph.addEdge(edgeCount++, address, nextTrans);
-						// address.sendee = inputTrans; Should not need to be written
-						address.setReceivee(nextTrans);
+						graph.addEdge(edgeCount++, address, trans);
+						address.setReceivee(trans);
 					}
 
 					lineSc.close();
@@ -240,11 +233,9 @@ public class FileParser {
 	{
 		Transaction newTrans = new Transaction();
 		
-		// Update transactions inputs
+		// Update transactions info
 		newTrans.setHashOfTransaction(transHash);
-		
-		if (time != -1)
-			newTrans.setTimeOfTransaction(time);
+		newTrans.setTimeOfTransaction(time);
 
 		transactions.put(transHash, newTrans);
 		

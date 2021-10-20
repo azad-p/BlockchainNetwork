@@ -34,7 +34,16 @@ public class Transaction extends GraphNode {
 	}
 
 	public void setTimeOfTransaction(long timeOfTransaction) {
-		this.timeOfTransaction = timeOfTransaction;
+		if (this.timeOfTransaction == -1)
+			this.timeOfTransaction = timeOfTransaction;
+		
+		// A transaction shouldn't already have a different time than what we expect
+		if (this.timeOfTransaction != -1 && this.timeOfTransaction != timeOfTransaction)
+		{
+			System.err.println ("A different time for this transaction has been recognized.");
+			System.err.println ("Something may be wrong..");
+			System.exit(0);
+		}
 	}
 
 	public Dictionary<Integer, Address> getOutputs() {

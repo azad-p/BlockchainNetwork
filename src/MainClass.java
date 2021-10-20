@@ -42,15 +42,42 @@ public class MainClass {
 		
 		// Run a performance check
 		performanceTest (parser);
+
+		// Some output for testing
+		testOutput (parser);
+	}
+	
+	// Provides some output just to test the network
+	static void testOutput(FileParser parser)
+	{
 		
 		// Fetch the results
-		Graph bitcoinNetwork = parser.getBitcoinNetwork();
+		Graph<GraphNode, Integer> bitcoinNetwork = parser.getBitcoinNetwork();
 		
 		Dictionary<String, Transaction> allTransactions = parser.getTransactions();
 		Dictionary<String, Address> allAddresses = parser.getAddresses();
 		
 		
 		// A test of the network
-		System.out.println(allTransactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").getOutputs().get(0));
+		// The results would change per year
+		if (YEAR == 2009)
+		{
+			System.out.println(allTransactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").getOutputs().get(0));
+			
+			Collection<Integer> results = bitcoinNetwork.getEdges();
+			
+			// Just print 10 edges
+			final int MAX_EDGES_TO_PRINT = 10;
+			int iteration = 0;
+			
+			for (Integer i : results)
+			{
+				if (iteration >= MAX_EDGES_TO_PRINT)
+					break;
+				
+				System.out.println (i);
+				iteration++;
+			}
+		}
 	}
 }

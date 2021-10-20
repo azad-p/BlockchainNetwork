@@ -197,16 +197,21 @@ public class FileParser {
 								inputTrans.getOutputs().put(indexOfInput, dummyAddress);
 								address = dummyAddress;
 							}
-
-							address = inputTrans.getOutputs().get(indexOfInput);
+							else
+							{
+								address = inputTrans.getOutputs().get(indexOfInput);
+								inputTrans.getOutputs().put(indexOfInput, address);
+								address.setSendee(inputTrans);
+								address.setReceivee(trans);
+							}
 						}
 
 						if (address == null) { System.err.println ("ERROR: Assertion ran. No address associated with the transaction."); System.exit(0); }
 
-						// Link the information together
+						// Link the information together on the graph & data
 						graph.addEdge(edgeCount++, inputTrans, address);
 						graph.addEdge(edgeCount++, address, trans);
-						address.setReceivee(trans);
+						trans.AddInput(address);
 					}
 
 					lineSc.close();

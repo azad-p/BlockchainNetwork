@@ -13,6 +13,8 @@ If the jar files fail, jung-2.0.1 can be downloaded here https://sourceforge.net
 
 You may be required to add the jar files to your build path if they are not already added.
 
+* NOTE: This is not required for Part A. We have removed Jung temporarily for improved memory usage, as we had implemented this part in two different ways *
+
 ## Eclipse
 
 For Eclipse, select all the jar files, right click -> Build Path -> Add to build path
@@ -31,7 +33,7 @@ The data-set is included in .gitignore, so it MUST be added manually; with the e
 
 MainClass.java contains the main class. Located in the src folder.
 
-* NOTE: This is not requires for Part A. We have removed Jung temporarily for improved memory usage, as we had implemented this in two ways *
+* NOTE: This is not required for Part A. We have removed Jung temporarily for improved memory usage, as we had implemented this part in two different ways *
 
 ## Output
 
@@ -47,4 +49,31 @@ For 2015, you will need to set the heap size to 32768 MB.
 
 Pass the command -Xmx32768m to the VM to do this.
 
-# Execution time (Part A)
+# Execution times (Part A)
+
+*NOTE* Due to the memory usage we have decided to run on different files from the 2015 dataset.
+
+This way we can still verify the correctness of the network, and only need to improve our mememory management to run the 2015 dataset.
+
+Connor Hryhoruk
+
+CPU: AMD Ryzen 7 2700X
+
+Dataset tested on: 2011
+
+~Execution times [Output from execution] ~
+
+Milliseconds to load output file: 45064ms (45.064 s)
+
+Milliseconds to load input file and link it with output 45965ms (45.965 s)
+
+Milliseconds of total execution: 91029ms (91.029 s)
+
+
+Dataset tested on: 2012
+
+Milliseconds to load output file: 238193ms (238.193 s)
+
+Milliseconds to load input file and link it with output 2069120ms (2069.12 s)
+
+Milliseconds of total execution: 2307314ms (2307.314 s)

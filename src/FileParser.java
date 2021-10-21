@@ -12,7 +12,7 @@ import edu.uci.ics.jung.graph.Graph;
 public class FileParser {
 	
 	// The bitcoin network
-	private final Graph<GraphNode, Integer> graph;
+	// private final Graph<GraphNode, Integer> graph; <--- Removed to save memory Not needed at this part of the assignment
 	
 	private final Hashtable<String, Transaction> transactions;
 	//private final Hashtable<String, Address> addresses; // <---- removed to save memory
@@ -34,7 +34,7 @@ public class FileParser {
 		
 		this.transactions = new Hashtable<String, Transaction>(HASH_SET_SIZE);
 		//this.addresses = new Hashtable<String, Address>(HASH_SET_OPTIONS);
-		this.graph = new DirectedSparseGraph<>();
+		// this.graph = new DirectedSparseGraph<>();
 	}
 	
 	public void parseOutput() {
@@ -47,7 +47,7 @@ public class FileParser {
 	
 	private void parseOutputFiles ()
 	{
-		int edgeCount = graph.getEdgeCount();
+		//int edgeCount = graph.getEdgeCount(); <--- Removed to save memory Not needed at this part of the assignment
 		BufferedReader fileSc = null;
 		Scanner lineSc = null;
 		FileReader reader = null;
@@ -75,7 +75,7 @@ public class FileParser {
 
 					if (trans == null) {
 						trans = addTransactionToTable(time, transHash);
-						graph.addVertex(trans);
+						// graph.addVertex(trans); <--- Removed to save memory Not needed at this part of the assignment
 					}
 
 					Dictionary<Byte, Address> addressesInOutput = new Hashtable<>();
@@ -84,7 +84,9 @@ public class FileParser {
 					// Create each address that is an output to this transaction
 					while (lineSc.hasNext())
 					{
-						String addressHash = lineSc.next();
+						 // Just take the first 3 characters of the address hash. It's not important anyways so saves memory
+						//  [That's why we do substring]
+						String addressHash = lineSc.next().substring(0, 3);
 
 						// Do not store 'no address' hashes. Just use an empty string.
 						// Just to save memory. We don't need it anyways.
@@ -103,8 +105,8 @@ public class FileParser {
 						//	addAddressToTable(addr);
 
 						// Add information to the graph
-						graph.addVertex(addr);
-						graph.addEdge(edgeCount++, trans, addr);
+						//graph.addVertex(addr); <--- Removed to save memory Not needed at this part of the assignment
+						//graph.addEdge(edgeCount++, trans, addr); <--- Removed to save memory Not needed at this part of the assignment
 					}
 
 					// Add information to the transaction
@@ -149,11 +151,13 @@ public class FileParser {
 				reader = null;
 			}
 		}
+		
+		
 	}
 
 	private void parseInputFiles ()
 	{
-		int edgeCount = graph.getEdgeCount();
+		// int edgeCount = Graph.getEdgeCount (); <--- Removed to save memory Not needed at this part of the assignment
 		BufferedReader fileSc = null;
 		Scanner lineSc = null;
 		FileReader reader = null;
@@ -186,7 +190,7 @@ public class FileParser {
 						// Transaction is not in the Hashtable
 						// Create the class, update any of its information, and add it to the Hashtable
 						trans = addTransactionToTable(transactionTime, transactionHash);
-						graph.addVertex(trans);
+						// graph.addVertex(trans); <--- Removed to save memory Not needed at this part of the assignment
 					}
 
 					// Check all of the transactions inputs
@@ -206,7 +210,7 @@ public class FileParser {
 							// Create the class, update any of its information, and add it to the Hashtable
 							// Then link them together
 							inputTrans = addTransactionToTable(-1, inputHash);
-							graph.addVertex(inputTrans);
+							// graph.addVertex(inputTrans); <--- Removed to save memory Not needed at this part of the assignment
 						}
 
 						Address address = null;
@@ -244,8 +248,8 @@ public class FileParser {
 						if (address == null) { System.err.println ("ERROR: Assertion ran. No address associated with the transaction."); System.exit(0); }
 
 						// Link the information together on the graph & data
-						graph.addEdge(edgeCount++, inputTrans, address);
-						graph.addEdge(edgeCount++, address, trans);
+						//graph.addEdge(edgeCount++, inputTrans, address);  <--- Removed to save memory Not needed at this part of the assignment
+						//graph.addEdge(edgeCount++, address, trans);  <--- Removed to save memory Not needed at this part of the assignment
 						trans.AddInput(address);
 					}
 
@@ -313,9 +317,9 @@ public class FileParser {
 	// ~~~~~~~~~~~~~~~~~
 	// Getters => Does not use setters
 	// ~~~~~~~~~~~~~~~~~
-	public Graph<GraphNode, Integer> getBitcoinNetwork()
+	// public Graph<GraphNode, Integer> getBitcoinNetwork()
 	{
-		return graph;
+		//return graph;  <--- Removed to save memory Not needed at this part of the assignment
 	}
 	
 	public Dictionary<String, Transaction> getTransactions()

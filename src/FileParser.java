@@ -67,6 +67,7 @@ public class FileParser {
 
 					// Parse the line
 					lineSc = new Scanner (entireLine);
+					entireLine = null;
 
 					int time = lineSc.nextInt();
 					String transHash = lineSc.next().intern();
@@ -78,8 +79,8 @@ public class FileParser {
 						// graph.addVertex(trans); <--- Removed to save memory Not needed at this part of the assignment
 					}
 
-					Dictionary<Byte, Address> addressesInOutput = new Hashtable<>();
-					byte indexOfOutput = 0;
+					Dictionary<Short, Address> addressesInOutput = new Hashtable<>();
+					short indexOfOutput = 0;
 
 					// Create each address that is an output to this transaction
 					while (lineSc.hasNext())
@@ -177,6 +178,7 @@ public class FileParser {
 
 					// Parse the line
 					lineSc = new Scanner(entireLine);
+					entireLine = null;
 
 					int transactionTime = lineSc.nextInt();
 					String transactionHash = lineSc.next().intern();
@@ -196,7 +198,7 @@ public class FileParser {
 					// Check all of the transactions inputs
 					while (lineSc.hasNext()) {
 						String inputHash = lineSc.next().intern();
-						byte indexOfInput = lineSc.nextByte();
+						short indexOfInput = lineSc.nextShort();
 
 						Transaction inputTrans = getTransFromTable(inputHash);
 
@@ -221,7 +223,7 @@ public class FileParser {
 							// Create a dummy address to mimic the transaction. Note that, the btc will not be known
 							Address dummyAddress = Address.createDummyAddress(inputTrans, trans, indexOfInput, YEAR_OF_DATASET);
 
-							Dictionary<Byte, Address> outputs = new Hashtable<>();
+							Dictionary<Short, Address> outputs = new Hashtable<>();
 							outputs.put(indexOfInput, dummyAddress);
 							inputTrans.setOutputs(outputs);
 							address = dummyAddress;

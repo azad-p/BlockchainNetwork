@@ -60,9 +60,9 @@ public class MainClass {
 		// Data in 2015 is too large to print out the entire set of transactions or network. Just do it for 2009 to confirm if it works.
 		if (YEAR == 2009)
 		{
-			System.out.println(allTransactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").getOutputs().get((byte) 0));
+			System.out.println(allTransactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").getOutputs().get((short) 0));
 			System.out.println(allTransactions.get("90ff15e5a80593977fb2f6666de2860584d39ebc3a41f65a0a1fdc3a851aefda"));
-			System.out.println(allTransactions.get("90ff15e5a80593977fb2f6666de2860584d39ebc3a41f65a0a1fdc3a851aefda").getOutputs().get((byte) 0));
+			System.out.println(allTransactions.get("90ff15e5a80593977fb2f6666de2860584d39ebc3a41f65a0a1fdc3a851aefda").getOutputs().get((short) 0));
 			// For printing the network & all transactions
 			// Might be too large to output on a single line
 			//System.out.println (allTransactions);

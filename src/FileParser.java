@@ -113,6 +113,7 @@ public class FileParser {
 
 				fileSc.close();
 				fileSc = null;
+				System.gc(); // Free memory after each file
 
 			} catch (IOException e) {
 				System.err.println("A problem has occurred");
@@ -210,7 +211,6 @@ public class FileParser {
 							// Special case
 							// Address was not found in the output files for this year
 							// Create a dummy address to mimic the transaction. Note that, the btc will not be known
-							System.out.println ("Here2");
 							Address dummyAddress = Address.createDummyAddress(inputTrans, trans, indexOfInput, YEAR_OF_DATASET);
 
 							Dictionary<Byte, Address> outputs = new Hashtable<>();
@@ -223,14 +223,13 @@ public class FileParser {
 							// This may be a case where the output occurred in a different year, but we already created the outputs dictionary
 							if (inputTrans.getOutputs().get(indexOfInput) == null)
 							{
-								System.out.println (".. Placing an output to an address that already existed..");
-								System.out.println ("Here3");
+								// System.out.println (".. Placing an output to an address that already existed..");
 								Address dummyAddress = Address.createDummyAddress(inputTrans, trans, indexOfInput, YEAR_OF_DATASET);
 								inputTrans.getOutputs().put(indexOfInput, dummyAddress);
 								address = dummyAddress;
 							}
 							else
-							{System.out.println ("Here4");
+							{
 								address = inputTrans.getOutputs().get(indexOfInput);
 								inputTrans.getOutputs().put(indexOfInput, address);
 								address.setSendee(inputTrans);
@@ -252,6 +251,7 @@ public class FileParser {
 
 				fileSc.close();
 				fileSc = null;
+				System.gc(); // Free memory after each file
 
 			} catch (IOException e) {
 				System.err.println("A problem has occurred");

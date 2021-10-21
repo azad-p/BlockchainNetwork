@@ -57,7 +57,7 @@ This way we can still verify the correctness of the network, and only need to im
 
 Connor Hryhoruk
 
-Dataset tested on: 2012
+Dataset tested on: 2011
 
 CPU: AMD Ryzen 7 2700X
 

@@ -41,8 +41,8 @@ Files are read entirely, one by one, and freed inbetween. The more memory the be
 
 The largest file in the 2015 data-set is ~1.5GB.
 
-For 2015, you will need to set the heap size to 16384 MB.
+For 2015, you will need to set the heap size to 32768 MB.
 
-Pass the command -Xmx16384m to the VM to do this.
+Pass the command -Xmx32768m to the VM to do this.
 
 # Execution time (Part A)

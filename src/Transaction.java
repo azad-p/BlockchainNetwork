@@ -2,12 +2,12 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 public class Transaction extends GraphNode {
-	// TODO: Make private with getters / setters. Lazy day
 	private String hashOfTransaction;
 	private int timeOfTransaction = -1;
 
 	// These linkedlists are in reverse order
 	// In other words, the tail [last address] is the first index
+	
 	private Dictionary<Integer, Address> inputs;
 	private Dictionary<Byte, Address> outputs;
 

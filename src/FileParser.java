@@ -18,6 +18,7 @@ public class FileParser {
 	//private final Hashtable<String, Address> addresses; // <---- removed to save memory
 
 	final int HASH_SET_SIZE = 16 * 256;
+	final int DICT_SIZE = 16 * 256;
 	
 	private int YEAR_OF_DATASET;
 	private final String FILE_FOLDER;
@@ -86,6 +87,7 @@ public class FileParser {
 						String addressHash = lineSc.next();
 
 						// Do not store 'no address' hashes. Just use an empty string.
+						// Just to save memory. We don't need it anyways.
 						if (addressHash.charAt(0) == 'n')
 							addressHash = "";
 

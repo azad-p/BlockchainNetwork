@@ -77,3 +77,16 @@ Milliseconds to load output file: 238193ms (238.193 s)
 Milliseconds to load input file and link it with output 2069120ms (2069.12 s)
 
 Milliseconds of total execution: 2307314ms (2307.314 s)
+
+Poupak Azad
+
+CPU: Intel Core i7-10750
+
+Dataset tested on: 2012
+
+Milliseconds to load output file: 177898ms (177.898 s)
+
+Milliseconds to load input file and link it with output 207913ms (207.913 s)
+
+Milliseconds of total execution: 385812ms (385.812 s)
+

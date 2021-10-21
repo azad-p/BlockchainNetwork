@@ -9,7 +9,7 @@ public class Transaction extends GraphNode {
 	// In other words, the tail [last address] is the first index
 	
 	private Dictionary<Integer, Address> inputs;
-	private Dictionary<Byte, Address> outputs;
+	private Dictionary<Short, Address> outputs;
 
 
 	public String toString ()
@@ -70,7 +70,7 @@ public class Transaction extends GraphNode {
 		}
 	}
 
-	public Dictionary<Byte, Address> getOutputs() {
+	public Dictionary<Short, Address> getOutputs() {
 		return outputs;
 	}
 	
@@ -79,7 +79,7 @@ public class Transaction extends GraphNode {
 		return inputs;
 	}
 
-	public void setOutputs(Dictionary<Byte, Address> outputs) {
+	public void setOutputs(Dictionary<Short, Address> outputs) {
 		this.outputs = outputs;
 	}
 

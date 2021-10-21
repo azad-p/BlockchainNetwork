@@ -33,11 +33,11 @@ MainClass.java contains the main class. Located in the src folder.
 
 ## Output
 
-Some output may be provided as per testing. This should show a few transactions outputs/inputs, which can be verified by searching the data-set directly.
+Some output may be provided as per testing. That is, if you use YEAR = 2009, the transactions and network will be printed.
 
 # Out of Memory ?
 
-Files are read entirely, one by one, and freed inbetween. The more memory the better.
+Files are read entirely, one by one, and freed in-between. The more memory the better.
 
 The largest file in the 2015 data-set is ~1.5GB.
 

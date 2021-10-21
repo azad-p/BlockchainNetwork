@@ -55,7 +55,6 @@ public class MainClass {
 		Graph<GraphNode, Integer> bitcoinNetwork = parser.getBitcoinNetwork();
 		
 		Dictionary<String, Transaction> allTransactions = parser.getTransactions();
-		Dictionary<String, Address> allAddresses = parser.getAddresses();
 		
 		
 		// A test of the network

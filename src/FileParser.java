@@ -15,9 +15,9 @@ public class FileParser {
 	private final Graph<GraphNode, Integer> graph;
 	
 	private final Hashtable<String, Transaction> transactions;
-	private final Hashtable<String, Address> addresses;
+	//private final Hashtable<String, Address> addresses; // <---- removed to save memory
 
-	final int HASH_SET_OPTIONS = 16 * 16 * 16;
+	final int HASH_SET_SIZE = 16 * 256;
 	
 	private int YEAR_OF_DATASET;
 	private final String FILE_FOLDER;
@@ -31,8 +31,8 @@ public class FileParser {
 		this.INPUT_FILE_NAME = "inputs" + YEAR_OF_DATASET_TO_PARSE + '_';
 		this.OUTPUT_FILE_NAME = "outputs" + YEAR_OF_DATASET_TO_PARSE + '_';
 		
-		this.transactions = new Hashtable<String, Transaction>(HASH_SET_OPTIONS);
-		this.addresses = new Hashtable<String, Address>(HASH_SET_OPTIONS);
+		this.transactions = new Hashtable<String, Transaction>(HASH_SET_SIZE);
+		//this.addresses = new Hashtable<String, Address>(HASH_SET_OPTIONS);
 		this.graph = new DirectedSparseGraph<>();
 	}
 	
@@ -59,7 +59,8 @@ public class FileParser {
 				reader = new FileReader(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + i + ".txt");
 				fileSc = new BufferedReader(reader);
 				String inputLine = null;
-				
+
+				System.out.println ("Placed file into memory. Now going through the file..");
 				while ((inputLine = fileSc.readLine()) != null) {
 					String entireLine = inputLine;
 
@@ -96,8 +97,8 @@ public class FileParser {
 						addressesInOutput.put(indexOfOutput++, addr);
 
 						// Addresses with no hash are not added to our table
-						if (addressHash != "")
-							addAddressToTable(addr);
+						//if (addressHash != "") <--- Removed to save memory
+						//	addAddressToTable(addr);
 
 						// Add information to the graph
 						graph.addVertex(addr);
@@ -164,6 +165,7 @@ public class FileParser {
 				fileSc = new BufferedReader(reader);
 				String inputLine = null;
 				
+				System.out.println ("Placed file into memory. Now going through the file..");
 				while ((inputLine = fileSc.readLine()) != null) {
 					String entireLine = inputLine;
 
@@ -300,14 +302,6 @@ public class FileParser {
 		return newTrans;
 	}
 
-	// Adding an address to the hashtable, and returning the address
-	private Address addAddressToTable(Address address)
-	{
-		addresses.put(address.getAddrHash(), address);
-
-		return address;
-	}
-
 	// Getting a transaction from the hashtable
 	private Transaction getTransFromTable (String transHash)
 	{
@@ -326,9 +320,21 @@ public class FileParser {
 	{
 		return transactions;
 	}
-	
+
+	/*
+	 * Removed to save memory
+	 * 
 	public Dictionary<String, Address> getAddresses()
 	{
 		return addresses;
 	}
+	
+	// Adding an address to the hashtable, and returning the address
+	private Address addAddressToTable(Address address)
+	{
+		addresses.put(address.getAddrHash(), address);
+
+		return address;
+	}
+	*/
 }

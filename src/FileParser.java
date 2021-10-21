@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Scanner;
 
@@ -14,7 +15,7 @@ public class FileParser {
 	// The bitcoin network
 	// private final Graph<GraphNode, Integer> graph; <--- Removed to save memory Not needed at this part of the assignment
 	
-	private final Hashtable<String, Transaction> transactions;
+	private final HashMap<String, Transaction> transactions;
 	//private final Hashtable<String, Address> addresses; // <---- removed to save memory
 
 	final int HASH_SET_SIZE = 16 * 256;
@@ -32,7 +33,7 @@ public class FileParser {
 		this.INPUT_FILE_NAME = "inputs" + YEAR_OF_DATASET_TO_PARSE + '_';
 		this.OUTPUT_FILE_NAME = "outputs" + YEAR_OF_DATASET_TO_PARSE + '_';
 		
-		this.transactions = new Hashtable<String, Transaction>(HASH_SET_SIZE);
+		this.transactions = new HashMap<String, Transaction>(HASH_SET_SIZE, 1.0f);
 		//this.addresses = new Hashtable<String, Address>(HASH_SET_OPTIONS);
 		// this.graph = new DirectedSparseGraph<>();
 	}
@@ -324,7 +325,7 @@ public class FileParser {
 		//return graph;  <--- Removed to save memory Not needed at this part of the assignment
 	}
 	
-	public Dictionary<String, Transaction> getTransactions()
+	public HashMap<String, Transaction> getTransactions()
 	{
 		return transactions;
 	}

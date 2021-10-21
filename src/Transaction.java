@@ -4,12 +4,12 @@ import java.util.Hashtable;
 public class Transaction extends GraphNode {
 	// TODO: Make private with getters / setters. Lazy day
 	private String hashOfTransaction;
-	private long timeOfTransaction = -1;
+	private int timeOfTransaction = -1;
 
 	// These linkedlists are in reverse order
 	// In other words, the tail [last address] is the first index
 	private Dictionary<Integer, Address> inputs;
-	private Dictionary<Integer, Address> outputs;
+	private Dictionary<Byte, Address> outputs;
 
 
 	public String toString ()
@@ -38,7 +38,7 @@ public class Transaction extends GraphNode {
 			System.exit(0);
 		}
 		
-		inputs.put(index, addr);
+		inputs.put( index, addr);
 	}
 	
 	// ~~~~~~~~~~~~~~~~~
@@ -53,11 +53,11 @@ public class Transaction extends GraphNode {
 		this.hashOfTransaction = hashOfTransaction;
 	}
 
-	public long getTimeOfTransaction() {
+	public int getTimeOfTransaction() {
 		return timeOfTransaction;
 	}
 
-	public void setTimeOfTransaction(long timeOfTransaction) {
+	public void setTimeOfTransaction(int timeOfTransaction) {
 		if (this.timeOfTransaction == -1)
 			this.timeOfTransaction = timeOfTransaction;
 		
@@ -70,7 +70,7 @@ public class Transaction extends GraphNode {
 		}
 	}
 
-	public Dictionary<Integer, Address> getOutputs() {
+	public Dictionary<Byte, Address> getOutputs() {
 		return outputs;
 	}
 	
@@ -79,7 +79,7 @@ public class Transaction extends GraphNode {
 		return inputs;
 	}
 
-	public void setOutputs(Dictionary<Integer, Address> outputs) {
+	public void setOutputs(Dictionary<Byte, Address> outputs) {
 		this.outputs = outputs;
 	}
 

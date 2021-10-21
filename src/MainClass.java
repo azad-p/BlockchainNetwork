@@ -62,7 +62,7 @@ public class MainClass {
 		// The results would change per year
 		if (YEAR == 2009)
 		{
-			System.out.println(allTransactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").getOutputs().get(0));
+			System.out.println(allTransactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").getOutputs().get((byte) 0));
 			
 			Collection<Integer> results = bitcoinNetwork.getEdges();
 			

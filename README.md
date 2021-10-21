@@ -34,3 +34,15 @@ MainClass.java contains the main class. Located in the src folder.
 ## Output
 
 Some output may be provided as per testing. This should show a few transactions outputs/inputs, which can be verified by searching the data-set directly.
+
+# Out of Memory ?
+
+Files are read entirely, one by one, and freed inbetween. The more memory the better.
+
+The largest file in the 2015 data-set is ~1.5GB.
+
+For 2015, you will need to set the heap size to 16384 MB.
+
+Pass the command -Xmx16384m to the VM to do this.
+
+# Execution time (Part A)

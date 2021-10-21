@@ -52,6 +52,8 @@ public class FileParser {
 		FileReader reader = null;
 
 		for (int i = 1; i <= 12; i++) {
+			System.out.println ("Reading output file: " + i);
+			
 			try {
 				// Run through the input files for each month
 				reader = new FileReader(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + i + ".txt");
@@ -64,7 +66,7 @@ public class FileParser {
 					// Parse the line
 					lineSc = new Scanner (entireLine);
 
-					long time = lineSc.nextLong();
+					int time = lineSc.nextInt();
 					String transHash = lineSc.next();
 
 					Transaction trans = getTransFromTable(transHash);
@@ -74,8 +76,8 @@ public class FileParser {
 						graph.addVertex(trans);
 					}
 
-					Dictionary<Integer, Address> addressesInOutput = new Hashtable<>();
-					int indexOfOutput = 0;
+					Dictionary<Byte, Address> addressesInOutput = new Hashtable<>();
+					byte indexOfOutput = 0;
 
 					// Create each address that is an output to this transaction
 					while (lineSc.hasNext())
@@ -114,6 +116,7 @@ public class FileParser {
 
 			} catch (IOException e) {
 				System.err.println("A problem has occurred");
+				System.exit(0);
 			} finally {
 				// Close any file
 				if (fileSc != null)
@@ -152,6 +155,8 @@ public class FileParser {
 		FileReader reader = null;
 
 		for (int i = 1; i <= 12; i++) {
+			System.out.println ("Reading input file: " + i);
+			
 			try {
 				// Run through the input files for each month
 				reader = new FileReader(FILE_FOLDER + '/' + INPUT_FILE_NAME + i + ".txt");
@@ -164,7 +169,7 @@ public class FileParser {
 					// Parse the line
 					lineSc = new Scanner(entireLine);
 
-					long transactionTime = lineSc.nextLong();
+					int transactionTime = lineSc.nextInt();
 					String transactionHash = lineSc.next();
 					Transaction trans = getTransFromTable(transactionHash);
 
@@ -182,7 +187,7 @@ public class FileParser {
 					// Check all of the transactions inputs
 					while (lineSc.hasNext()) {
 						String inputHash = lineSc.next();
-						int indexOfInput = lineSc.nextInt();
+						byte indexOfInput = lineSc.nextByte();
 
 						Transaction inputTrans = getTransFromTable(inputHash);
 
@@ -205,10 +210,10 @@ public class FileParser {
 							// Special case
 							// Address was not found in the output files for this year
 							// Create a dummy address to mimic the transaction. Note that, the btc will not be known
-
+							System.out.println ("Here2");
 							Address dummyAddress = Address.createDummyAddress(inputTrans, trans, indexOfInput, YEAR_OF_DATASET);
 
-							Dictionary<Integer, Address> outputs = new Hashtable<>();
+							Dictionary<Byte, Address> outputs = new Hashtable<>();
 							outputs.put(indexOfInput, dummyAddress);
 							inputTrans.setOutputs(outputs);
 							address = dummyAddress;
@@ -219,13 +224,13 @@ public class FileParser {
 							if (inputTrans.getOutputs().get(indexOfInput) == null)
 							{
 								System.out.println (".. Placing an output to an address that already existed..");
-
+								System.out.println ("Here3");
 								Address dummyAddress = Address.createDummyAddress(inputTrans, trans, indexOfInput, YEAR_OF_DATASET);
 								inputTrans.getOutputs().put(indexOfInput, dummyAddress);
 								address = dummyAddress;
 							}
 							else
-							{
+							{System.out.println ("Here4");
 								address = inputTrans.getOutputs().get(indexOfInput);
 								inputTrans.getOutputs().put(indexOfInput, address);
 								address.setSendee(inputTrans);
@@ -282,7 +287,7 @@ public class FileParser {
 	}
 	
 	// Adding a transaction to the hashTable
-	private Transaction addTransactionToTable(long time, String transHash)
+	private Transaction addTransactionToTable(int time, String transHash)
 	{
 		Transaction newTrans = new Transaction();
 		

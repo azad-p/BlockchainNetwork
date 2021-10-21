@@ -31,6 +31,8 @@ The data-set is included in .gitignore, so it MUST be added manually; with the e
 
 MainClass.java contains the main class. Located in the src folder.
 
+* NOTE: This is not requires for Part A. We have removed Jung temporarily for improved memory usage, as we had implemented this in two ways *
+
 ## Output
 
 Some output may be provided as per testing. That is, if you use YEAR = 2009, a transaction will be printed as per testing the result.

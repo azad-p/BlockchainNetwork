@@ -47,7 +47,7 @@ public class Address extends GraphNode {
         	sentBtc = String.valueOf(btcSent);
         }
 
-        return "Transaction: " + sendee + " Is sending " + sentBtc + " Through the address: " + addrName + " "
+        return "Transaction: " + sendee + " Is sending " + sentBtc + " Through the address: (First 3 chars of hash) " + addrName + " "
         		+ "To the transaction: " + receivee;
     }
     

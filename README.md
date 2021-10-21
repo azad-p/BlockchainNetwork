@@ -47,4 +47,12 @@ For 2015, you will need to set the heap size to 32768 MB.
 
 Pass the command -Xmx32768m to the VM to do this.
 
-# Execution time (Part A)
+# Execution times (Part A)
+
+*NOTE* Due to the memory usage and time constraint we have decided to run the 2012 files instead of the 2015.
+
+Connor Hryhoruk
+
+CPU: AMD Ryzen 7 2700X
+
+~Execution times [Output from execution] ~

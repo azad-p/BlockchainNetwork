@@ -57,9 +57,9 @@ This way we can still verify the correctness of the network, and only need to im
 
 Connor Hryhoruk
 
-Dataset tested on: 2011
-
 CPU: AMD Ryzen 7 2700X
+
+Dataset tested on: 2011
 
 ~Execution times [Output from execution] ~
 
@@ -68,3 +68,12 @@ Milliseconds to load output file: 45064ms (45.064 s)
 Milliseconds to load input file and link it with output 45965ms (45.965 s)
 
 Milliseconds of total execution: 91029ms (91.029 s)
+
+
+Dataset tested on: 2012
+
+Milliseconds to load output file: 238193ms (238.193 s)
+
+Milliseconds to load input file and link it with output 2069120ms (2069.12 s)
+
+Milliseconds of total execution: 2307314ms (2307.314 s)

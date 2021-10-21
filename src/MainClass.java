@@ -1,250 +1,71 @@
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
-
-import java.io.*;
 import java.util.*;
-import java.time.Instant;
 
 public class MainClass {
 	
-	static final int YEAR = 2009;
+	static final int YEAR = 2015;
 	
-	static final String FILE_FOLDER = "edges" + YEAR;
-	static final String INPUT_FILE_NAME = "inputs" + YEAR + '_';
-	static final String OUTPUT_FILE_NAME = "outputs" + YEAR + '_';
-	
-	static final int HASH_SET_OPTIONS = 16 * 16 * 16;
-	static Hashtable<String, Transaction> transactions = new Hashtable<String, Transaction>(HASH_SET_OPTIONS);
-	static Hashtable<String, Address> addresses = new Hashtable<String, Address>(HASH_SET_OPTIONS);
-
-	static Transaction addTransactionToTable(long time, String transHash)
+	// Test & Outputs the performance for parser a bitcoin network dataset (Input / Output files)
+	// The parser goes through the output file first, then links the input files with the output files
+	static void performanceTest (FileParser parser)
 	{
-		Transaction newTrans = new Transaction();
+		long startTime = System.nanoTime();
 		
-		// Update transactions inputs
-		newTrans.hashOfTransaction = transHash;
+		// Parse the output file, then link it with the input file
+		parser.parseOutput();
 		
-		if (time != -1)
-			newTrans.timeOfTransaction = time;
-
-		transactions.put(transHash, newTrans);
+		long startTimeOfInputLink = System.nanoTime();
 		
-		return newTrans;
-	}
-
-	static Address addAddressToTable(Address address)
-	{
-		addresses.put(address.addrHash, address);
-
-		return address;
-	}
-
-	static Transaction getTransFromTable (String transHash)
-	{
-		return transactions.get(transHash);
-	}
-
-	static void parseOutputFiles (Graph graph)
-	{
-		int edgeCount = graph.getEdgeCount();
-		Scanner fileSc = null;
-		Scanner lineSc = null;
-
-		for (int i = 1; i <= 12; i++) {
-			try {
-				// Run through the input files for each month
-				fileSc = new Scanner(new File(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + i + ".txt"));
-
-				while (fileSc.hasNextLine()) {
-					String entireLine = fileSc.nextLine();
-
-					// Parse the line
-					lineSc = new Scanner (entireLine);
-
-					long time = lineSc.nextLong();
-					String transHash = lineSc.next();
-
-					Transaction trans = getTransFromTable(transHash);
-
-					if (trans == null) {
-						trans = addTransactionToTable(time, transHash);
-						graph.addVertex(trans);
-					}
-
-					Dictionary<Integer, Address> addressesInOutput = new Hashtable<>();
-					int indexOfOutput = 0;
-
-					// Create each address that is an output to this transaction
-					while (lineSc.hasNext())
-					{
-						String addressHash = lineSc.next();
-
-						// Do not store 'no address' hashes. Just use an empty string.
-						if (addressHash.charAt(0) == 'n')
-							addressHash = "";
-
-						long amountSent = lineSc.nextLong();
-
-						// Create address for output of the transaction
-						Address addr = new Address (amountSent, addressHash);
-						addr.sendee = trans;
-						addressesInOutput.put(indexOfOutput++, addr);
-
-						// Addresses with no hash are not added to our table
-						if (addressHash != "")
-							addAddressToTable(addr);
-
-						// Add information to the graph
-						graph.addVertex(addr);
-						graph.addEdge(edgeCount++, trans, addr);
-					}
-
-					// Add information to the transaction
-					trans.outputs = addressesInOutput;
-
-					lineSc.close();
-					lineSc = null;
-				}
-
-				fileSc.close();
-				fileSc = null;
-
-			} catch (IOException e) {
-				System.err.println("A problem has occurred");
-			} finally {
-				// If any scanner were not closed, close them
-				if (fileSc != null)
-					fileSc.close();
-				if (lineSc != null)
-					lineSc.close();
-			}
-		}
-	}
-
-	static void parseInputFiles (Graph graph)
-	{
-		int edgeCount = graph.getEdgeCount();
-
-		Scanner fileSc = null;
-		Scanner lineSc = null;
-
-		for (int i = 1; i <= 12; i++) {
-			try {
-				// Run through the input files for each month
-				fileSc = new Scanner(new File(FILE_FOLDER + '/' + INPUT_FILE_NAME + i + ".txt"));
-
-				while (fileSc.hasNextLine()) {
-					String entireLine = fileSc.nextLine();
-
-					// Parse the line
-					lineSc = new Scanner(entireLine);
-
-					long transactionTime = lineSc.nextLong();
-					String transactionHash = lineSc.next();
-					Transaction nextTrans = getTransFromTable(transactionHash);
-
-					if (nextTrans != null) {
-						// Transaction is already in the hashTable
-						// Just update any of its information
-						nextTrans.timeOfTransaction = transactionTime;
-					} else {
-						// Transaction is not in the Hashtable
-						// Create the class, update any of its information, and add it to the Hashtable
-						nextTrans = addTransactionToTable(transactionTime, transactionHash);
-						graph.addVertex(nextTrans);
-					}
-
-					// Check all of the transactions inputs
-					while (lineSc.hasNext()) {
-						String inputHash = lineSc.next();
-						int indexOfInput = lineSc.nextInt();
-
-						Transaction inputTrans = getTransFromTable(inputHash);
-
-						if (inputTrans != null) {
-							// Transaction is already in the hashTable
-							// Link them together via reference from hashTable
-							inputTrans = transactions.get(inputHash);
-
-						} else {
-							// Transaction is not in the Hashtable
-							// Create the class, update any of its information, and add it to the Hashtable
-							// Then link them together
-							inputTrans = addTransactionToTable(-1, inputHash);
-							graph.addVertex(inputTrans);
-						}
-
-						/*
-						System.out.println ("~Input Trans info~");
-						System.out.println (inputTrans.hashOfTransaction);
-						System.out.println (indexOfInput);
-						if (inputTrans.outputs != null) System.out.println (inputTrans.outputs.size());*/
-
-						Address address = null;
-
-						if (inputTrans.outputs == null)
-						{
-							// Special case
-							// Address was not found in the output files for this year
-							// Create a dummy address to mimick the transaction. Note that, the btc will not be known
-
-							Address dummyAddress = Address.createDummyAddress(inputTrans, nextTrans, indexOfInput, YEAR);
-
-							Dictionary<Integer, Address> outputs = new Hashtable<>();
-							outputs.put(indexOfInput, dummyAddress);
-							inputTrans.outputs = outputs;
-							address = dummyAddress;
-						}
-						else {
-							// Fail
-							// This may be a case where the output occured in a different year, but we already created the outputs dictionary
-							if (inputTrans.outputs.get(indexOfInput) == null)
-							{
-								System.out.println (".. Placing an output to an address that already existed..");
-
-								Address dummyAddress = Address.createDummyAddress(inputTrans, nextTrans, indexOfInput, YEAR);
-								inputTrans.outputs.put(indexOfInput, dummyAddress);
-								address = dummyAddress;
-							}
-
-							address = inputTrans.outputs.get(indexOfInput);
-						}
-
-						if (address == null) { System.err.println ("ERROR: Assertion ran. No address associated with the transaction."); System.exit(0); }
-
-						graph.addEdge(edgeCount++, inputTrans, address);
-						graph.addEdge(edgeCount++, address, nextTrans);
-						// address.sendee = inputTrans; Should not need to be written
-						address.receivee = nextTrans;
-					}
-
-					lineSc.close();
-					lineSc = null;
-				}
-
-				fileSc.close();
-				fileSc = null;
-
-			} catch (IOException e) {
-				System.err.println("A problem has occurred");
-			} finally {
-				// If any scanner were not closed, close them
-				if (fileSc != null)
-					fileSc.close();
-				if (lineSc != null)
-					lineSc.close();
-			}
-		}
+		parser.linkInputFileToOutputs();
+		
+		long endTime = System.nanoTime();
+		
+		// Note: The announcement is incorrect, this time should be divided by 1000000 NOT 1000
+		// 1,000,000 nanoseconds is 1 millisecond
+		long timeOfOutputParsing = (startTimeOfInputLink - startTime) / 1_000_000;
+		long timeOfInputParsing = (endTime - startTimeOfInputLink) / 1_000_000;
+		
+		long totalTime = (endTime - startTime) / 1_000_000;
+		
+		System.out.println ("~~~~~~Performance Results~~~~~~~~~~");
+		System.out.println ("Note: Data is read & Linked together immediately after being read for improved efficiency.\n We do not read ALL data, and then link it together.");
+		System.out.println ("Milliseconds to load output file: " + timeOfOutputParsing + "ms (" + (timeOfOutputParsing * 0.001) + " s)");
+		System.out.println ("Milliseconds to load input file and link it with output " + timeOfInputParsing + "ms (" + (timeOfInputParsing * 0.001) + " s)");
+		System.out.println ("Milliseconds of total execution: " + totalTime + "ms (" + (totalTime * 0.001) + " s)");
+		System.out.println ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 	
 	public static void main(String[] args) {
 
-		Graph<Transaction, Integer> bitcoinNetwork = new DirectedSparseGraph<>();
+		// Create the parser. Going through the dataset for a given year.
+		FileParser parser = new FileParser (YEAR);
+		
+		// Run a performance check
+		performanceTest (parser);
 
-		// Assumption: Output addresses are initialized before going through the input file
-		parseOutputFiles (bitcoinNetwork);
-		parseInputFiles (bitcoinNetwork);
-		System.out.println(transactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").outputs.get(0));
-
+		// Some output for testing
+		testOutput (parser);
+	}
+	
+	// Provides some output just to test the network
+	static void testOutput(FileParser parser)
+	{
+		
+		// Fetch the results
+		Dictionary<String, Transaction> allTransactions = parser.getTransactions();
+		
+		
+		// A test of the network
+		// The results would change per year
+		// Data in 2015 is too large to print out the entire set of transactions or network. Just do it for 2009 to confirm if it works.
+		if (YEAR == 2009)
+		{
+			System.out.println(allTransactions.get("35288d269cee1941eaebb2ea85e32b42cdb2b04284a56d8b14dcc3f5c65d6055").getOutputs().get((byte) 0));
+			System.out.println(allTransactions.get("90ff15e5a80593977fb2f6666de2860584d39ebc3a41f65a0a1fdc3a851aefda"));
+			System.out.println(allTransactions.get("90ff15e5a80593977fb2f6666de2860584d39ebc3a41f65a0a1fdc3a851aefda").getOutputs().get((byte) 0));
+			// For printing the network & all transactions
+			// Might be too large to output on a single line
+			//System.out.println (allTransactions);
+		}
 	}
 }

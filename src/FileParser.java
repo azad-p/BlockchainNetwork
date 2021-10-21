@@ -69,7 +69,7 @@ public class FileParser {
 					lineSc = new Scanner (entireLine);
 
 					int time = lineSc.nextInt();
-					String transHash = lineSc.next();
+					String transHash = lineSc.next().intern();
 
 					Transaction trans = getTransFromTable(transHash);
 
@@ -86,7 +86,7 @@ public class FileParser {
 					{
 						 // Just take the first 3 characters of the address hash. It's not important anyways so saves memory
 						//  [That's why we do substring]
-						String addressHash = lineSc.next().substring(0, 3);
+						String addressHash = lineSc.next().substring(0, 3).intern();
 
 						// Do not store 'no address' hashes. Just use an empty string.
 						// Just to save memory. We don't need it anyways.
@@ -179,7 +179,7 @@ public class FileParser {
 					lineSc = new Scanner(entireLine);
 
 					int transactionTime = lineSc.nextInt();
-					String transactionHash = lineSc.next();
+					String transactionHash = lineSc.next().intern();
 					Transaction trans = getTransFromTable(transactionHash);
 
 					if (trans != null) {
@@ -195,7 +195,7 @@ public class FileParser {
 
 					// Check all of the transactions inputs
 					while (lineSc.hasNext()) {
-						String inputHash = lineSc.next();
+						String inputHash = lineSc.next().intern();
 						byte indexOfInput = lineSc.nextByte();
 
 						Transaction inputTrans = getTransFromTable(inputHash);

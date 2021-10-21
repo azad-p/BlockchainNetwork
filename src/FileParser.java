@@ -115,7 +115,7 @@ public class FileParser {
 			} catch (IOException e) {
 				System.err.println("A problem has occurred");
 			} finally {
-				// If any scanner were not closed, close them
+				// Close any file
 				if (fileSc != null)
 					try {
 						fileSc.close();
@@ -135,6 +135,11 @@ public class FileParser {
 						e.printStackTrace();
 						System.exit(0);
 					}
+				
+				// Assuring de-allocation of reference for garbage collector
+				fileSc = null;
+				lineSc = null;
+				reader = null;
 			}
 		}
 	}
@@ -267,6 +272,11 @@ public class FileParser {
 						e.printStackTrace();
 						System.exit(0);
 					}
+				
+				// Assuring de-allocation of reference for garbage collector
+				fileSc = null;
+				lineSc = null;
+				reader = null;
 			}
 		}
 	}

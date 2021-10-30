@@ -3,6 +3,7 @@ public class Address extends GraphNode {
     private long btcSent;
     private Transaction receivee;
     private Transaction sendee;
+    private int something = 55;
 
     public Address () {}
     public Address(long amountSent, String hash)

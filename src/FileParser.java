@@ -112,6 +112,7 @@ public class FileParser {
 
 			} catch (IOException e) {
 				System.err.println("A problem has occurred reading the file.");
+				e.printStackTrace();
 				System.exit(0);
 			} finally {
 				// Close any file

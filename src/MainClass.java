@@ -3,7 +3,7 @@ import java.util.*;
 
 public class MainClass {
 
-	static final int YEAR = 2009 ;
+	static final int YEAR = 2015 ;
 
 	// Test & Outputs the performance for parser a bitcoin network dataset (Input / Output files)
 	// The parser goes through the output file first, then links the input files with the output files

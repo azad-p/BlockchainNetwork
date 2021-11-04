@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -79,8 +76,6 @@ public class FileParser {
 						graph.addVertex(trans);
 					}
 
-					short indexOfOutput = 0;
-
 					// Create each address that is an output to this transaction
 					while (lineSc.hasNext())
 					{
@@ -116,7 +111,7 @@ public class FileParser {
 				System.gc(); // Free memory after each file
 
 			} catch (IOException e) {
-				System.err.println("A problem has occurred");
+				System.err.println("A problem has occurred reading the file.");
 				System.exit(0);
 			} finally {
 				// Close any file
@@ -221,7 +216,7 @@ public class FileParser {
 
 							// Output edges exist
 
-							Collection outputs = graph.getOutEdges(inputTrans);
+							Collection<Integer> outputs = graph.getOutEdges(inputTrans);
 
 							// Sort the outputs by their index in the graph
 							ArrayList<Integer> outputsSorted = new ArrayList<Integer>(outputs);

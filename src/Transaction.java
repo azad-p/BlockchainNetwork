@@ -1,6 +1,3 @@
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 public class Transaction extends GraphNode {
 	private String hashOfTransaction;
 	private int timeOfTransaction = -1;

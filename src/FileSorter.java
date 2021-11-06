@@ -26,15 +26,15 @@ public class FileSorter {
 	// FALSE means output files
 	private static final boolean SORT_INPUTS = true;
 	
-	// Debug mode will end execution after N lines, to test the output
-	private static final boolean DEBUG_MODE = false;
-	private static final int DEBUG_N = 51100;
-	
 	// Files are sorted one at a time so memory is a non-issue
 	// Set this to the month you wish to sort
 	// For example, to sort inputs2015_10, this should be 10
 	// to sort inputs2015_2, this should be 2
 	private static final int MONTH_TO_SORT = 1; 
+	
+	// Debug mode will end execution after N lines, to test the output
+	private static final boolean DEBUG_MODE = false;
+	private static final int DEBUG_N = 51100;
 	
 	private static final String sortedFolderPath = "sortedFiles/"; // To assure this path is used on where the sorted files are placed
 	private static final String sortedFileName;

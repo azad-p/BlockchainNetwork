@@ -48,3 +48,33 @@ For 2015, you will need to set the heap size to 32768 MB.
 Pass the command -Xmx32768m to the VM to do this.
 
 # Execution time (Part A)
+
+# Ransomware Features
+
+These features are extracted for ransomware payments. 
+Payments are split into 24 hour windows.
+
+* Total received amount
+
+* Number of transactions in a window
+
+* Addresses in a label (# of unique addresses and what they are)
+
+* Total neighbors, weight, length, income, loops of an address
+
+* Largest length in a window
+
+* Addresses used as outputs to starter transactions (Length 0)
+
+* Ratio of the total weight of a window to the number of start transactions in a window
+
+* Total loop for each label
+
+* Number of co-spenders (Part A required)
+
+* Number of transitions (Part A required)
+
+* Total number of unique users in network (using co-spenders & transitions) (Part A required)
+
+* Number of ransomware addresses in a window, and total
+

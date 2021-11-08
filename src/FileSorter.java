@@ -20,11 +20,11 @@ import java.util.Comparator;
 public class FileSorter {
 
 	// Year of the datasets we are sorting
-	private static final int YEAR = 2015;
+	private static final int YEAR = 2009;
 	
 	// We are sorting the input files
 	// FALSE means output files
-	private static final boolean SORT_INPUTS = false;
+	private static final boolean SORT_INPUTS = true;
 	
 	// Files are sorted one at a time so memory is a non-issue
 	// Set this to the month you wish to sort

@@ -3,11 +3,15 @@ import java.util.*;
 
 public class MainClass {
 
-	static final int YEAR = 2015;
+	static final int YEAR = 2009;
 	
 	// Set this to true for Part B of the assignment
 	// False for part A of the assignment
 	static final boolean WINDOW_FEATURE_EXTRACTION = true;
+	
+	// The months to extract features for {1 = january, 12 = december}
+	// This is used only if WINDOW_FEATURE_EXTRACTION is true
+	static final byte[] MONTHS_TO_EXTRACT = { (byte) 12 };
 
 	// Test & Outputs the performance for parser a bitcoin network dataset (Input / Output files)
 	// The parser goes through the output file first, then links the input files with the output files
@@ -38,23 +42,35 @@ public class MainClass {
 		System.out.println ("Milliseconds of total execution: " + totalTime + "ms (" + (totalTime * 0.001) + " s)");
 		System.out.println ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
+	
+	static void runWindowParser (WindowParser parser)
+	{
+		parser.parseOutput();
+		parser.linkInputFileToOutputs();
+	}
 
 	public static void main(String[] args) {
 
+		// Part A
 		if (!WINDOW_FEATURE_EXTRACTION)
 		{
 			// Create the parser. Going through the dataset for a given year.
 			FileParser parser = new FileParser (YEAR);
-	
-			// Run a performance check
+			
 			performanceTest (parser);
 	
 			// Some output for testing
 			printGraph(parser.getGraph());
 		}
+		// Part B
 		else
 		{
+			WindowParser parser = new WindowParser (YEAR, MONTHS_TO_EXTRACT);
 			
+			runWindowParser (parser);
+			
+			// Some output
+			printGraph(parser.getGraph());
 		}
 	}
 

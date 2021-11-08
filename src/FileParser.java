@@ -6,16 +6,12 @@ import java.util.*;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 
-public class FileParser {
+public class FileParser extends Parser {
 
 	// The bitcoin network
 	private final Graph<GraphNode, Integer> graph;
 
 	private final HashMap<String, Transaction> transactions;
-	//private final Hashtable<String, Address> addresses;
-
-	final int HASH_SET_SIZE = 16 * 256;
-	final int DICT_SIZE = 16 * 256;
 
 	private int YEAR_OF_DATASET;
 	private final String FILE_FOLDER;
@@ -24,13 +20,14 @@ public class FileParser {
 
 	FileParser (int YEAR_OF_DATASET_TO_PARSE)
 	{
+		final int HASH_SET_SIZE = 16 * 256;
+		
 		this.YEAR_OF_DATASET = YEAR_OF_DATASET_TO_PARSE;
 		this.FILE_FOLDER = "edges" + YEAR_OF_DATASET_TO_PARSE;
 		this.INPUT_FILE_NAME = "inputs" + YEAR_OF_DATASET_TO_PARSE + '_';
 		this.OUTPUT_FILE_NAME = "outputs" + YEAR_OF_DATASET_TO_PARSE + '_';
 
 		this.transactions = new HashMap<String, Transaction>(HASH_SET_SIZE, 1.0f);
-		//this.addresses = new Hashtable<String, Address>(HASH_SET_SIZE);
 		this.graph = new DirectedSparseGraph<>();
 	}
 

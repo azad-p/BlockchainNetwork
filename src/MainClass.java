@@ -4,6 +4,10 @@ import java.util.*;
 public class MainClass {
 
 	static final int YEAR = 2015;
+	
+	// Set this to true for Part B of the assignment
+	// False for part A of the assignment
+	static final boolean WINDOW_FEATURE_EXTRACTION = true;
 
 	// Test & Outputs the performance for parser a bitcoin network dataset (Input / Output files)
 	// The parser goes through the output file first, then links the input files with the output files
@@ -37,14 +41,21 @@ public class MainClass {
 
 	public static void main(String[] args) {
 
-		// Create the parser. Going through the dataset for a given year.
-		FileParser parser = new FileParser (YEAR);
-
-		// Run a performance check
-		performanceTest (parser);
-
-		// Some output for testing
-		printGraph(parser.getGraph());
+		if (!WINDOW_FEATURE_EXTRACTION)
+		{
+			// Create the parser. Going through the dataset for a given year.
+			FileParser parser = new FileParser (YEAR);
+	
+			// Run a performance check
+			performanceTest (parser);
+	
+			// Some output for testing
+			printGraph(parser.getGraph());
+		}
+		else
+		{
+			
+		}
 	}
 
 	static void printGraph(Graph<GraphNode, Integer> graph)

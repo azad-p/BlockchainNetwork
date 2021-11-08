@@ -90,10 +90,6 @@ public class FileParser extends Parser {
 						// Create address for output of the transaction
 						Address addr = new Address (amountSent, addressHash);
 
-						// Addresses with no hash are not added to our table
-						//if (addressHash != "") <--- Removed to save memory
-						//	addAddressToTable(addr);
-
 						// Add information to the graph
 						graph.addVertex(addr);
 						graph.addEdge(edgeCount++, trans, addr);

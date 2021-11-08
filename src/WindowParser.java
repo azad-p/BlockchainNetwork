@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,26 +55,27 @@ public class WindowParser extends Parser {
 	private void parseOutputFiles ()
 	{
 		int edgeCount = graph.getEdgeCount();
-		BufferedReader fileSc = null;
-		Scanner lineSc = null;
-		FileReader reader = null;
-
+		FileInputStream fileStream = null;
+		Scanner fileSc = null;
+		
 		for (int i = 0; i < MONTHS.length; i++) {
 			System.out.println ("Reading output file: " + MONTHS [i]);
 
 			try {
 				// Run through the input files for each month
-				reader = new FileReader(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + MONTHS [i] + ".txt");
-				fileSc = new BufferedReader(reader);
-				String inputLine = null;
+				fileStream = new FileInputStream(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + MONTHS [i] + ".txt");
+				fileSc = new Scanner (fileStream, "UTF-8");
 
 				System.out.println ("Placed file into memory. Now going through the file..");
-				while ((inputLine = fileSc.readLine()) != null) {
-					String entireLine = inputLine;
-
-					// Parse the line
-					lineSc = new Scanner (entireLine);
-					entireLine = null;
+				while (fileSc.hasNextLine()) {
+					
+					String wholeLine = fileSc.nextLine();
+					
+					// Next 'window'
+					if (wholeLine.equals("\n"))
+						continue;
+					
+					Scanner lineSc = new Scanner(wholeLine);
 
 					int time = lineSc.nextInt();
 					String transHash = lineSc.next().intern();
@@ -96,7 +98,7 @@ public class WindowParser extends Parser {
 						// Just to save memory. We don't need it anyways.
 						if (addressHash.charAt(0) == 'n')
 							addressHash = "";
-
+						
 						long amountSent = lineSc.nextLong();
 
 						// Create address for output of the transaction
@@ -110,13 +112,15 @@ public class WindowParser extends Parser {
 						graph.addVertex(addr);
 						graph.addEdge(edgeCount++, trans, addr);
 					}
-
+					
 					lineSc.close();
 					lineSc = null;
 				}
 
 				fileSc.close();
 				fileSc = null;
+				fileStream.close();
+				fileStream = null;
 				System.gc(); // Free memory after each file
 
 			} catch (IOException e) {
@@ -125,59 +129,48 @@ public class WindowParser extends Parser {
 				System.exit(0);
 			} finally {
 				// Close any file
+				if (fileStream != null)
+					try {
+						fileStream.close();
+					} catch (IOException e) {
+						System.err.println ("A problem occurred with reading the files");
+						e.printStackTrace();
+						System.exit(0);
+					}
 				if (fileSc != null)
-					try {
-						fileSc.close();
-					} catch (IOException e) {
-						System.err.println ("A problem occurred with reading the files");
-						e.printStackTrace();
-						System.exit(0);
-					}
-				if (lineSc != null)
-					lineSc.close();
-
-				if (reader != null)
-					try {
-						reader.close();
-					} catch (IOException e) {
-						System.err.println ("A problem occurred with reading the files");
-						e.printStackTrace();
-						System.exit(0);
-					}
+					fileSc.close();
 
 				// Assuring de-allocation of reference for garbage collector
+				fileStream = null;
 				fileSc = null;
-				lineSc = null;
-				reader = null;
 			}
 		}
-
-
 	}
 
 	private void parseInputFiles ()
 	{
 		int edgeCount = graph.getEdgeCount ();
-		BufferedReader fileSc = null;
-		Scanner lineSc = null;
-		FileReader reader = null;
+		FileInputStream fileStream = null;
+		Scanner fileSc = null;
 
 		for (int i = 0; i < MONTHS.length; i++) {
 			System.out.println ("Reading input file: " + MONTHS [i]);
 
 			try {
 				// Run through the input files for each month
-				reader = new FileReader(FILE_FOLDER + '/' + INPUT_FILE_NAME + MONTHS [i] + ".txt");
-				fileSc = new BufferedReader(reader);
-				String inputLine = null;
+				fileStream = new FileInputStream(FILE_FOLDER + '/' + INPUT_FILE_NAME + MONTHS [i] + ".txt");
+				fileSc = new Scanner (fileStream, "UTF-8");
 
 				System.out.println ("Placed file into memory. Now going through the file..");
-				while ((inputLine = fileSc.readLine()) != null) {
-					String entireLine = inputLine;
-
-					// Parse the line
-					lineSc = new Scanner(entireLine);
-					entireLine = null;
+				while (fileSc.hasNextLine()) {
+					
+					String wholeLine = fileSc.nextLine();
+					
+					// Next 'window'
+					if (wholeLine.equals("\n"))
+						continue;
+					
+					Scanner lineSc = new Scanner(wholeLine);
 
 					int transactionTime = lineSc.nextInt();
 					String transactionHash = lineSc.next().intern();
@@ -193,7 +186,9 @@ public class WindowParser extends Parser {
 						trans = addTransactionToTable(transactionTime, transactionHash);
 						graph.addVertex(trans);
 					}
-
+					
+					System.out.println(wholeLine);
+					
 					// Check all of the transactions inputs
 					while (lineSc.hasNext()) {
 						String inputHash = lineSc.next().intern();
@@ -260,13 +255,15 @@ public class WindowParser extends Parser {
 						graph.addEdge(edgeCount++, inputTrans, address);
 						graph.addEdge(edgeCount++, address, trans);
 					}
-
+					
 					lineSc.close();
 					lineSc = null;
 				}
 
 				fileSc.close();
 				fileSc = null;
+				fileStream.close();
+				fileStream = null;
 				System.gc(); // Free memory after each file
 
 			} catch (IOException e) {
@@ -274,30 +271,20 @@ public class WindowParser extends Parser {
 				System.exit(0);
 			} finally {
 				// If any scanner were not closed, close them
+				if (fileStream != null)
+					try {
+						fileStream.close();
+					} catch (IOException e) {
+						System.err.println ("A problem occurred with reading the files");
+						e.printStackTrace();
+						System.exit(0);
+					}
 				if (fileSc != null)
-					try {
-						fileSc.close();
-					} catch (IOException e) {
-						System.err.println ("A problem occurred with reading the files");
-						e.printStackTrace();
-						System.exit(0);
-					}
-				if (lineSc != null)
-					lineSc.close();
-
-				if (reader != null)
-					try {
-						reader.close();
-					} catch (IOException e) {
-						System.err.println ("A problem occurred with reading the files");
-						e.printStackTrace();
-						System.exit(0);
-					}
+					fileSc.close();
 
 				// Assuring de-allocation of reference for garbage collector
+				fileStream = null;
 				fileSc = null;
-				lineSc = null;
-				reader = null;
 			}
 		}
 	}

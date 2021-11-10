@@ -20,7 +20,7 @@ import java.util.Comparator;
 public class FileSorter {
 
 	// Year of the datasets we are sorting
-	private static final int YEAR = 2009;
+	private static final int YEAR = 2015;
 	
 	// We are sorting the input files
 	// FALSE means output files
@@ -30,7 +30,7 @@ public class FileSorter {
 	// Set this to the month you wish to sort
 	// For example, to sort inputs2015_10, this should be 10
 	// to sort inputs2015_2, this should be 2
-	private static final int MONTH_TO_SORT = 12; 
+	private static final int MONTH_TO_SORT = 2; 
 	
 	// Debug mode will end execution after N lines, to test the output
 	private static final boolean DEBUG_MODE = false;
@@ -158,7 +158,7 @@ public class FileSorter {
 		
 		try {
 			
-			fw = new FileWriter (sortedFolderPath + sortedFileName, false);
+			fw = new FileWriter (sortedFolderPath + sortedFileName + ".txt", false);
 			bw = new BufferedWriter (fw);
 			writer = new PrintWriter (bw);
 			
@@ -202,6 +202,7 @@ public class FileSorter {
 				writer.println (curLine.toString());
 			}
 			
+			writer.println(); // Extra empty line at the EOF, so we can read the final empty line
 			writer.flush();
 		
 		} catch (IOException e) { e.printStackTrace(); System.out.println ("Failed to write contents to file."); } 

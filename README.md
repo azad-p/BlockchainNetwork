@@ -78,4 +78,3 @@ Payments are split into 24 hour windows.
 
 * Number of ransomware addresses in a window, and total
 
-Testing Webhook

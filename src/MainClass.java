@@ -45,7 +45,7 @@ public class MainClass {
 	
 	static void runWindowParser (WindowParser parser)
 	{
-		parser.extractFeatures(YEAR);
+		parser.beginFeatureExtractions(YEAR);
 	}
 
 	public static void main(String[] args) {

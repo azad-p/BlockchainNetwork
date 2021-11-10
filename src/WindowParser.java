@@ -23,6 +23,8 @@ public class WindowParser extends Parser {
 
 	private byte[] MONTHS;
 	
+	int totalWindowsInOutputFiles, totalWindowsInInputFiles;
+	
 	WindowParser (byte[] MONTHS_TO_EXTRACT_FEATURES)
 	{
 		final int HASH_SET_SIZE_INIT = 16 * 256;
@@ -32,11 +34,40 @@ public class WindowParser extends Parser {
 		this.MONTHS = MONTHS_TO_EXTRACT_FEATURES;
 	}
 	
+	public void beginFeatureExtractions(int YEAR_OF_DATASET)
+	{
+		// Initialize any features
+		totalWindowsInOutputFiles = 0;
+		totalWindowsInInputFiles = 0;
+		
+		extractFeatures (YEAR_OF_DATASET);
+		displayResults();
+	}
+	
+	private void displayResults()
+	{
+		printFeatures();
+		writeFeatures();
+	}
+	
+	// Print some of the features to the console
+	private void printFeatures()
+	{
+		System.out.println ("Total windows in output file: " + totalWindowsInOutputFiles);
+		System.out.println ("Total windows in input file: " + totalWindowsInInputFiles);
+	}
+	
+	// Write our final results to a csv file
+	private void writeFeatures()
+	{
+		
+	}
+	
 	// Extracts the features for a specific year in the dataset
-	public void extractFeatures(int YEAR_OF_DATASET) {
+	private void extractFeatures(int YEAR_OF_DATASET) {
 		
 		// Bitcoin network
-		Graph<GraphNode, Integer> graph; // = new DirectedSparseGraph<>();
+		Graph<GraphNode, Integer> graph = null;
 		
 		// Determine the files we need to go over
 		final String FILE_FOLDER = "sortedFiles";
@@ -52,8 +83,6 @@ public class WindowParser extends Parser {
 		{
 			System.out.println ("Reading files for the month of: " + MONTHS [monthIndex]);
 			
-			final int numDaysInMonth = (YearMonth.of (YEAR_OF_DATASET, MONTHS[monthIndex])).lengthOfMonth();
-		
 			try {
 				
 			fileStreamOutput = new FileInputStream(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + MONTHS [monthIndex] + ".txt");
@@ -63,13 +92,15 @@ public class WindowParser extends Parser {
 			System.out.println ("Placed Input/Output files into memory. Now going through the files through each window..");
 			
 			} catch (IOException e) {
-				System.err.println("A problem has occurred reading the file.");
+				System.err.println("A problem has occurred with trying to load the file. Is the directory correct?");
 				e.printStackTrace();
 				System.exit(0);
 			}
 			
+			final int numDaysInMonth = (YearMonth.of (YEAR_OF_DATASET, MONTHS[monthIndex])).lengthOfMonth();
+			
 			// We will at MOST be going through this many days
-			// The functions will return true when they reach EOF
+			// When both files reach EOF, we will break
 			for (int day = 1; day <= numDaysInMonth; day++)
 			{
 				// Create the bitcoin network for this window
@@ -78,11 +109,10 @@ public class WindowParser extends Parser {
 				parseOutputFiles(MONTHS [monthIndex], fileScOutput, graph);
 				parseInputFiles (YEAR_OF_DATASET, MONTHS [monthIndex], fileScInput, graph); // Links input file with output file
 				
-				deallocateMemory(fileStreamOutput, fileScOutput, fileStreamInput, fileScInput, graph);
+				deallocateMemory(fileStreamOutput, fileScOutput, fileStreamInput, fileScInput, graph, true);
 				if (!fileScOutput.hasNextLine() && !fileScInput.hasNextLine())
 					break;
 			}
-			
 			
 			// Close all files
 			try {
@@ -93,11 +123,13 @@ public class WindowParser extends Parser {
 				fileScInput.close();
 				
 			} catch (IOException e) { e.printStackTrace(); System.exit (0); System.err.println ("Failed to close a file."); }
+			
+			deallocateMemory(fileStreamOutput, fileScOutput, fileStreamInput, fileScInput, graph, false);
 		}
 	}
 	
 	private void parseOutputFiles (int month, Scanner fileSc, Graph<GraphNode, Integer> graph)
-	{
+	{	
 		int edgeCount = graph.getEdgeCount();
 
 		while (fileSc.hasNextLine()) {
@@ -107,8 +139,13 @@ public class WindowParser extends Parser {
 			// Next 'window'
 			if (wholeLine.isEmpty())
 			{
-				// Completed this section
-				break;
+				totalWindowsInOutputFiles++;
+				
+				// Completed execution of this window
+				// Do nothing else
+				// Feature extraction step is done when parsing the input files
+				// This way we link them first
+				return;
 			}
 				
 			Scanner lineSc = new Scanner(wholeLine);
@@ -126,9 +163,7 @@ public class WindowParser extends Parser {
 			// Create each address that is an output to this transaction
 			while (lineSc.hasNext())
 			{
-				// Just take the first 3 characters of the address hash. It's not important anyways so saves memory
-				//  [That's why we do substring]
-				String addressHash = lineSc.next().substring(0, 3).intern();
+				String addressHash = lineSc.next().intern();
 
 				// Do not store 'no address' hashes. Just use an empty string.
 				// Just to save memory. We don't need it anyways.
@@ -166,12 +201,12 @@ public class WindowParser extends Parser {
 			// Next 'window'
 			if (wholeLine.isEmpty())
 			{
-				System.out.println ("Completed a window");
+				totalWindowsInInputFiles++;
 				
 				// Extract features from this window
 				
 				
-				// Complete execution
+				// Complete execution of this window
 				return;
 			}
 			Scanner lineSc = new Scanner(wholeLine);
@@ -267,13 +302,19 @@ public class WindowParser extends Parser {
 	}
 
 	// De-allocate the memory for this window
-	private void deallocateMemory(FileInputStream fileStreamOutput, Scanner fileScOutput, FileInputStream fileStreamInput, Scanner fileScInput, Graph<GraphNode, Integer> graph)
+	// If onlyDealocateWindow is true, then we are not deallocating the streams/scanner
+	private void deallocateMemory(FileInputStream fileStreamOutput, Scanner fileScOutput, FileInputStream fileStreamInput, Scanner fileScInput, 
+			Graph<GraphNode, Integer> graph, boolean onlyDealocateWindow)
 	{
 		// De-allocate all memory for this window
-		fileStreamOutput = null;
-		fileScOutput = null;
-		fileStreamInput = null;
-		fileScInput = null;
+		if (!onlyDealocateWindow)
+		{
+			fileStreamOutput = null;
+			fileScOutput = null;
+			fileStreamInput = null;
+			fileScInput = null;
+		}
+		
 		graph = null;
 		
 		addresses.clear();

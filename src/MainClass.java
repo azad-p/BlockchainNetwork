@@ -45,8 +45,7 @@ public class MainClass {
 	
 	static void runWindowParser (WindowParser parser)
 	{
-		parser.parseOutput();
-		parser.linkInputFileToOutputs();
+		parser.extractFeatures(YEAR);
 	}
 
 	public static void main(String[] args) {
@@ -65,12 +64,9 @@ public class MainClass {
 		// Part B
 		else
 		{
-			WindowParser parser = new WindowParser (YEAR, MONTHS_TO_EXTRACT);
+			WindowParser parser = new WindowParser (MONTHS_TO_EXTRACT);
 			
 			runWindowParser (parser);
-			
-			// Some output
-			printGraph(parser.getGraph());
 		}
 		
 		System.out.println ("Execution has completed.");

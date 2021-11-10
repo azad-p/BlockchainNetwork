@@ -1,7 +1,7 @@
 public class Address extends GraphNode {
     private String addrHash;
     private long btcSent;
-
+    
     public Address () {}
     public Address(long amountSent, String hash)
     {

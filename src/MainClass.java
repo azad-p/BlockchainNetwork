@@ -5,6 +5,10 @@ public class MainClass {
 
 	static final int YEAR = 2009;
 	
+	// How many white addresses are considered
+	// We reduced this to 500 instead of 1000, just to save space more
+	static final int WHITE_ADDRESS_LIMIT = 500;
+	
 	// Set this to true for Part B of the assignment
 	// False for part A of the assignment
 	static final boolean WINDOW_FEATURE_EXTRACTION = true;
@@ -64,7 +68,7 @@ public class MainClass {
 		// Part B
 		else
 		{
-			WindowParser parser = new WindowParser (MONTHS_TO_EXTRACT);
+			WindowParser parser = new WindowParser (MONTHS_TO_EXTRACT, WHITE_ADDRESS_LIMIT);
 			
 			runWindowParser (parser);
 		}

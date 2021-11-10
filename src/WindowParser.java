@@ -27,12 +27,14 @@ public class WindowParser extends Parser {
 
 	private byte[] MONTHS;
 	
+	final int WHITE_ADDR_LIMIT; // Limit of white addresses that we consider per window
 	int totalWindowsInOutputFiles, totalWindowsInInputFiles;
 	
-	WindowParser (byte[] MONTHS_TO_EXTRACT_FEATURES)
+	WindowParser (byte[] MONTHS_TO_EXTRACT_FEATURES, int ADDR_LIMIT)
 	{
 		final int HASH_SET_SIZE_INIT = 16 * 256;
-		
+	
+		this.WHITE_ADDR_LIMIT = ADDR_LIMIT;
 		this.transactions = new HashMap<String, Transaction>(HASH_SET_SIZE_INIT, 1.0f);
 		this.addresses = new HashMap<String, Address>(HASH_SET_SIZE_INIT, 1.0f);
 		this.MONTHS = MONTHS_TO_EXTRACT_FEATURES;
@@ -109,8 +111,6 @@ public class WindowParser extends Parser {
 		Collection<GraphNode> vertices = graph.getVertices();
 		
 		int totalNumTransactions = 0;
-		
-		final int WHITE_ADDR_LIMIT = 1000; // Limit of white addresses that we consider per window
 		int totalWhiteAddresses = 0, totalRansomeAddresses = 0;
 		
 		for (GraphNode node : vertices)

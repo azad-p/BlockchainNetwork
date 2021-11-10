@@ -165,11 +165,14 @@ public class WindowParser extends Parser {
 				while (fileSc.hasNextLine()) {
 					
 					String wholeLine = fileSc.nextLine();
-					
+					System.out.println(wholeLine);
+					System.out.flush();
 					// Next 'window'
 					if (wholeLine.equals("\n"))
+					{
+						System.out.println ("Completed a window");
 						continue;
-					
+					}
 					Scanner lineSc = new Scanner(wholeLine);
 
 					int transactionTime = lineSc.nextInt();
@@ -186,8 +189,6 @@ public class WindowParser extends Parser {
 						trans = addTransactionToTable(transactionTime, transactionHash);
 						graph.addVertex(trans);
 					}
-					
-					System.out.println(wholeLine);
 					
 					// Check all of the transactions inputs
 					while (lineSc.hasNext()) {
@@ -229,7 +230,10 @@ public class WindowParser extends Parser {
 							ArrayList<Integer> outputsSorted = new ArrayList<Integer>(outputs);
 							Collections.sort(outputsSorted);
 
-							if (outputs == null || outputs.size() == 0)
+							// Do not have an index for this output
+							// Can occur if there was multiple index's from the input file but none were in the output file
+							// In this case, outputs.size() < indedxOfInput would be true
+							if (outputs == null || outputs.size() == 0 || outputs.size() <= indexOfInput)
 							{
 								address = Address.createDummyAddress(indexOfInput, YEAR_OF_DATASET);
 							}

@@ -218,7 +218,7 @@ public class FileParser extends Parser {
 							ArrayList<Integer> outputsSorted = new ArrayList<Integer>(outputs);
 							Collections.sort(outputsSorted);
 
-							if (outputs == null || outputs.size() == 0)
+							if (outputs == null || outputs.size() == 0 || outputs.size() <= indexOfInput)
 							{
 								address = Address.createDummyAddress(indexOfInput, YEAR_OF_DATASET);
 							}

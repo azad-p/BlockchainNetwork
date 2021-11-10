@@ -72,6 +72,8 @@ public class MainClass {
 			// Some output
 			printGraph(parser.getGraph());
 		}
+		
+		System.out.println ("Execution has completed.");
 	}
 
 	static void printGraph(Graph<GraphNode, Integer> graph)

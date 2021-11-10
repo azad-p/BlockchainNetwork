@@ -34,9 +34,9 @@ public class WindowParser extends Parser {
 		final int HASH_SET_SIZE = 16 * 256;
 		
 		this.YEAR_OF_DATASET = YEAR_OF_DATASET_TO_PARSE;
-		this.FILE_FOLDER = "edges" + YEAR_OF_DATASET_TO_PARSE;
-		this.INPUT_FILE_NAME = "inputs" + YEAR_OF_DATASET_TO_PARSE + '_';
-		this.OUTPUT_FILE_NAME = "outputs" + YEAR_OF_DATASET_TO_PARSE + '_';
+		this.FILE_FOLDER = "sortedFiles";
+		this.INPUT_FILE_NAME = "Sorted_inputs" + YEAR_OF_DATASET_TO_PARSE + '_';
+		this.OUTPUT_FILE_NAME = "Sorted_outputs" + YEAR_OF_DATASET_TO_PARSE + '_';
 
 		this.transactions = new HashMap<String, Transaction>(HASH_SET_SIZE, 1.0f);
 		this.addresses = new HashMap<String, Address>(HASH_SET_SIZE, 1.0f);
@@ -72,9 +72,12 @@ public class WindowParser extends Parser {
 					String wholeLine = fileSc.nextLine();
 					
 					// Next 'window'
-					if (wholeLine.equals("\n"))
+					if (wholeLine.isEmpty())
+					{
+						System.out.println ("Completed a window");
 						continue;
-					
+					}
+						
 					Scanner lineSc = new Scanner(wholeLine);
 
 					int time = lineSc.nextInt();
@@ -165,10 +168,9 @@ public class WindowParser extends Parser {
 				while (fileSc.hasNextLine()) {
 					
 					String wholeLine = fileSc.nextLine();
-					System.out.println(wholeLine);
-					System.out.flush();
+					
 					// Next 'window'
-					if (wholeLine.equals("\n"))
+					if (wholeLine.isEmpty())
 					{
 						System.out.println ("Completed a window");
 						continue;

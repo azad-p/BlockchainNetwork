@@ -2,10 +2,14 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -60,7 +64,103 @@ public class WindowParser extends Parser {
 	// Write our final results to a csv file
 	private void writeFeatures()
 	{
+		// TODO: Write results
+	}
+	
+	private double getIncome (Address address, GraphNode sender,  Graph<GraphNode, Integer> graph)
+	{
+		double res = 0.0d;
+		Collection<Integer> outEdges = graph.getOutEdges(sender);
 		
+		// Calculate income
+		for (Integer i : outEdges)
+		{
+			GraphNode input = graph.getDest(i);
+			
+			if (input instanceof Transaction)
+			{
+				System.err.println ("Assertion ran! ");
+				System.err.println ("Transaction is an output to an address?");
+				System.exit(0);
+			}
+			else
+			{
+				res += ((Address)input).getBtcSent();
+			}
+		}
+		
+		return res;
+	}
+	
+	// Example method, returns true if it is a ransomeware address
+	// Returns the label
+	private String isRansomeWareAddress(String hash, int year, int day)
+	{
+		// Please do not complete this method
+		// Write it in a different class
+		// This is temporary
+		return "";
+	}
+	
+	// Grab the features
+	// These are features of a specific window
+	private void getFeaturesFromGraph(int year, int day, Graph<GraphNode, Integer> graph)
+	{
+		Collection<GraphNode> vertices = graph.getVertices();
+		
+		int totalNumTransactions = 0;
+		
+		final int WHITE_ADDR_LIMIT = 1000; // Limit of white addresses that we consider per window
+		int totalWhiteAddresses = 0, totalRansomeAddresses = 0;
+		
+		for (GraphNode node : vertices)
+		{
+			if (node instanceof Address)
+			{	
+				Address adr = (Address)node;
+				
+				String hash = adr.getAddrHash();
+				
+				if (isRansomeWareAddress (hash, year, day) == null)
+				{
+					// Don't bother extracting features for all these extra white addresses
+					if (totalWhiteAddresses >= WHITE_ADDR_LIMIT)
+						continue;
+					
+					++totalWhiteAddresses;
+				}
+				else
+				{
+					++totalRansomeAddresses;
+				}
+				
+				Collection<Integer> inEdges = graph.getInEdges(adr);
+				double incomeRet = getIncome (adr, graph.getSource((int)(inEdges.toArray())[0]), graph);
+				
+				// Negative income is just zero
+				double income = incomeRet;
+				
+				long amountSent = adr.getBtcSent();
+				int numNeightbours = graph.getNeighborCount(adr);
+				
+				System.out.println ("Printing");
+				System.out.println (hash + " income: " + income);
+				System.out.println (amountSent);
+				System.out.println (numNeightbours);
+			}
+			else if (node instanceof Transaction)
+			{
+				++totalNumTransactions;
+			}
+			else {
+				System.err.println ("Assertion ran! ");
+				System.err.println ("Unknown type received");
+				System.exit(0);
+			}
+		}
+		
+		System.out.println ("Total ransome addresses in window: " + totalRansomeAddresses);
+		System.out.println ("Total transactions in window: " + totalNumTransactions);
 	}
 	
 	// Extracts the features for a specific year in the dataset
@@ -79,7 +179,7 @@ public class WindowParser extends Parser {
 		FileInputStream fileStreamInput = null;
 		Scanner fileScInput = null;
 		
-		for (int monthIndex = 0; monthIndex < MONTHS.length; monthIndex++)
+		for (int monthIndex = 0; monthIndex < MONTHS.length; ++monthIndex)
 		{
 			System.out.println ("Reading files for the month of: " + MONTHS [monthIndex]);
 			
@@ -101,12 +201,12 @@ public class WindowParser extends Parser {
 			
 			// We will at MOST be going through this many days
 			// When both files reach EOF, we will break
-			for (int day = 1; day <= numDaysInMonth; day++)
+			for (int day = 1; day <= numDaysInMonth; ++day)
 			{
 				// Create the bitcoin network for this window
 				graph = new DirectedSparseGraph<>();
 				
-				parseOutputFiles(MONTHS [monthIndex], fileScOutput, graph);
+				parseOutputFiles(fileScOutput, graph);
 				parseInputFiles (YEAR_OF_DATASET, MONTHS [monthIndex], fileScInput, graph); // Links input file with output file
 				
 				deallocateMemory(fileStreamOutput, fileScOutput, fileStreamInput, fileScInput, graph, true);
@@ -128,7 +228,7 @@ public class WindowParser extends Parser {
 		}
 	}
 	
-	private void parseOutputFiles (int month, Scanner fileSc, Graph<GraphNode, Integer> graph)
+	private void parseOutputFiles (Scanner fileSc, Graph<GraphNode, Integer> graph)
 	{	
 		int edgeCount = graph.getEdgeCount();
 
@@ -192,7 +292,7 @@ public class WindowParser extends Parser {
 	private void parseInputFiles (int year, int month, Scanner fileSc, Graph<GraphNode, Integer> graph)
 	{
 		int edgeCount = graph.getEdgeCount ();
-
+		Transaction firstTrans = null; // For getting the day
 		
 		while (fileSc.hasNextLine()) {
 			
@@ -203,10 +303,21 @@ public class WindowParser extends Parser {
 			{
 				totalWindowsInInputFiles++;
 				
-				// Extract features from this window
+				if (firstTrans != null)
+				{
+					// Obtained from https://stackoverflow.com/questions/45392163/java-get-current-day-from-unix-timestamp
+					// Get the current day from a unix time
+					int dayOfMonth = Integer.parseInt(new SimpleDateFormat("dd").format(new Date(firstTrans.getTimeOfTransaction() * 1000L)));
+					int dayOfYear = (new GregorianCalendar (year, month - 1, dayOfMonth)).get (Calendar.DAY_OF_YEAR);
+					
+					System.out.println ("Getting features for the window: year " + year + " day " + dayOfYear);
+					
+					// Extract features from this window
+					getFeaturesFromGraph (year, dayOfYear, graph);
+					firstTrans = null;
+				}
 				
-				
-				// Complete execution of this window
+				// Complete execution of this window 
 				return;
 			}
 			Scanner lineSc = new Scanner(wholeLine);
@@ -226,6 +337,9 @@ public class WindowParser extends Parser {
 				graph.addVertex(trans);
 			}
 			
+			if (firstTrans == null)
+				firstTrans = trans;
+			
 			// Check all of the transactions inputs
 			while (lineSc.hasNext()) {
 				String inputHash = lineSc.next().intern();
@@ -233,12 +347,7 @@ public class WindowParser extends Parser {
 
 				Transaction inputTrans = getTransFromTable(inputHash);
 
-				if (inputTrans != null) {
-					// Transaction is already in the hashTable
-					// Link them together via reference from hashTable
-					inputTrans = transactions.get(inputHash);
-
-				} else {
+				if (inputTrans == null) {
 					// Transaction is not in the Hashtable
 					// Create the class, update any of its information, and add it to the Hashtable
 					// Then link them together

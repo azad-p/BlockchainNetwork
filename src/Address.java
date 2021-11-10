@@ -15,7 +15,7 @@ public class Address extends GraphNode {
     public static Address createDummyAddress (int indexOfTransaction, int year)
     {
         Address dummyAddress = new Address ();
-        dummyAddress.btcSent = -1; // Undefined, we cannot know this, maybe in a different year
+        dummyAddress.btcSent = 0; // Undefined, we cannot know this, maybe in a different year
 
         // Custom hash of the address
         dummyAddress.addrHash = indexOfTransaction + " in " + year;
@@ -32,18 +32,18 @@ public class Address extends GraphNode {
         if (addrName == "")
             addrName = "NoName";
 
-        // If the btcSent is -1 in an address, it means the special case occurred and the address was not in the output file
+        // If the btcSent is 0 in an address, we may have the special case where the address was not in the output file
         // IE: May have been sent on a different year. Thus, the btc sent is unknown.
-        if (btcSent == -1)
+        if (btcSent == 0)
         {
-            sentBtc = "Uknown";
+            sentBtc = "Unknown";
         }
         else
         {
             sentBtc = String.valueOf(btcSent);
         }
 
-        return "sending " + sentBtc + " Through the address: (First 3 chars of hash) " + addrName;
+        return "\nsending " + sentBtc + " Through the address: " + addrName;
     }
 
     // ~~~~~~~~~~~~~~~~~
@@ -51,6 +51,9 @@ public class Address extends GraphNode {
     // ~~~~~~~~~~~~~~~~~
 
     public String getAddrHash() {
+        if (addrHash.isEmpty())
+            return "NoName";
+    	
         return addrHash;
     }
     public void setAddrHash(String addrHash) {

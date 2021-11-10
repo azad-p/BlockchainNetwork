@@ -5,7 +5,7 @@ public class Transaction extends GraphNode {
 	@Override
 	public String toString()
 	{
-		return "Transaction time: " + timeOfTransaction + " Hash: " + hashOfTransaction;
+		return "\nTransaction time: " + timeOfTransaction + " Hash: " + hashOfTransaction;
 	}
 
 	// ~~~~~~~~~~~~~~~~~

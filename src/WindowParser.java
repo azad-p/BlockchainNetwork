@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -25,7 +23,6 @@ import edu.uci.ics.jung.graph.Graph;
 public class WindowParser extends Parser {
 
 	private final HashMap<String, Transaction> transactions; // FIXME perhaps use Integer, Transactions, where int is the index in graph ?
-	//private final HashMap<String, Address> addresses;
 
 	private byte[] MONTHS;
 	
@@ -38,7 +35,6 @@ public class WindowParser extends Parser {
 	
 		this.WHITE_ADDR_LIMIT = ADDR_LIMIT;
 		this.transactions = new HashMap<String, Transaction>(HASH_SET_SIZE_INIT, 1.0f);
-		//this.addresses = new HashMap<String, Address>(HASH_SET_SIZE_INIT, 1.0f);
 		this.MONTHS = MONTHS_TO_EXTRACT_FEATURES;
 	}
 	
@@ -49,71 +45,60 @@ public class WindowParser extends Parser {
 		totalWindowsInInputFiles = 0;
 		
 		extractFeatures (YEAR_OF_DATASET);
-		displayResults();
 	}
 	
-	private void displayResults()
+	private void displayAddressResults(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses)
 	{
-		printFeatures();
-		writeFeatures();
+		printFeatures(hash, income, amountSent, numNeighbours, numCoAddresses);
+		writeAddressFeatures(year, day, hash, income, amountSent, numNeighbours, numCoAddresses);
+	}
+	
+	private void displayWindowResults(int year, int day, int totalTrans, int numRansomeAddresses, int numWhiteAddresses)
+	{
+		printWindow(year, day, totalTrans, numRansomeAddresses, numWhiteAddresses);
+		writeWindowFeatures(year, day, totalTrans, numRansomeAddresses, numWhiteAddresses);
 	}
 	
 	// Print some of the features to the console
-	private void printFeatures()
+	private void printFeatures(String hash, double income, long amountSent, int numNeighbours, int numCoAddresses)
 	{
 		System.out.println ("Total windows in output file: " + totalWindowsInOutputFiles);
 		System.out.println ("Total windows in input file: " + totalWindowsInInputFiles);
+		System.out.println (hash + " income: " + income);
+		System.out.println ("Amount sent: " + amountSent);
+		System.out.println ("Neighbours: " + numNeighbours);
+		System.out.println ("CoAddresses: " + numCoAddresses);
+	}
+	
+	private void printWindow(int year, int day, int totalTrans, int numRansome, int numWhite)
+	{
+		System.out.println ("Printing window: year " + year + ", day " + day);
+		System.out.println ("Total ransome addresses in window: " + numRansome);
+		System.out.println ("Total transactions in window: " + totalTrans);
 	}
 	
 	// Write our final results to a csv file
-	private void writeFeatures()
+	private void writeAddressFeatures(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses)
 	{
 		// TODO: Write results
 	}
 	
-	private double getIncome (Address address, GraphNode sender,  Graph<GraphNode, Integer> graph)
+	// Write our final results to a csv file
+	private void writeWindowFeatures(int year, int day, int totalTrans, int numRansomeAddresses, int numWhiteAddresses)
 	{
-		double res = 0.0d;
-		Collection<Integer> outEdges = graph.getOutEdges(sender);
-		
-		// Calculate income
-		for (Integer i : outEdges)
-		{
-			GraphNode input = graph.getDest(i);
-			
-			if (input instanceof Transaction)
-			{
-				System.err.println ("Assertion ran! ");
-				System.err.println ("Transaction is an output to an address?");
-				System.exit(0);
-			}
-			else
-			{
-				res += ((Address)input).getBtcSent();
-			}
-		}
-		
-		return res;
+		// TODO: Write results
 	}
 	
-	// Example method, returns true if it is a ransomeware address
-	// Returns the label
-	private String isRansomeWareAddress(String hash, int year, int day)
-	{
-		// Please do not complete this method
-		// Write it in a different class
-		// This is temporary
-		return "";
-	}
 	
 	// Grab the features
 	// These are features of a specific window
 	private void getFeaturesFromGraph(int year, int day, Graph<GraphNode, Integer> graph)
 	{
-		HashSet<Integer> coAddressMap = new HashSet<Integer>(150); // Place co-addresses here
-																   // Stores the index in the graph
 		Collection<GraphNode> vertices = graph.getVertices();
 		
+		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Features for a window (All addresses on current year/day)
+		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		int totalNumTransactions = 0;
 		int totalWhiteAddresses = 0, totalRansomeAddresses = 0;
 		
@@ -140,67 +125,83 @@ public class WindowParser extends Parser {
 					++totalRansomeAddresses;
 				}
 				
+				// ~~~~~~~~~~~~~~~~~~~~~~~
+				// Features for an address
+				// ~~~~~~~~~~~~~~~~~~~~~~~
+				double income = 0.0d;
+				long amountSent = 0;
+				int numNeighbours = 0;
+				int numCoAddresses = 0;
+				
 				Collection<Integer> inEdges = graph.getInEdges(adr);
 				double incomeRet = getIncome (adr, graph.getSource((int)(inEdges.toArray())[0]), graph);
 				
 				// Negative income is just zero
-				double income = incomeRet;
+				income = incomeRet;
 				
-				long amountSent = adr.getBtcSent();
-				int numNeightbours = graph.getNeighborCount(adr);
+				amountSent = adr.getBtcSent();
+				numNeighbours = graph.getNeighborCount(adr);
 				
-				System.out.println ("Printing");
-				System.out.println (hash + " income: " + income);
-				System.out.println (amountSent);
-				System.out.println (numNeightbours);
+				// Check for co-addresses of this transaction
+				Iterator<Integer> it = graph.getOutEdges(adr).iterator();
+				
+				HashSet<Integer> coAddressMap = new HashSet<Integer>(150); // Place co-addresses here
+																		   // Stores the index in the graph
+				
+				while (it.hasNext())
+				{
+					Integer sentTo = it.next();
+					GraphNode trans = graph.getDest(sentTo);
+					
+					assertBool (trans instanceof Transaction, "Address should be sending to a transaction.");
+					
+					Object[] edgesArr = graph.getOutEdges(trans).toArray();
+					int firstNode = -1;
+					
+					if (edgesArr.length > 0)
+						firstNode = (int)edgesArr [0];
+					
+					// Every extra inputs on the transaction means there is a co-address
+					// Since two addresses will be inputs to the same address
+					for (int i = 1; i < edgesArr.length; i++)
+					{
+						// These should be addresses
+						int other = (int)edgesArr [i];
+						GraphNode test = graph.getSource((int)edgesArr [i]);
+						
+						assertBool (!(test instanceof Transaction), "Transaction should be receiving from an address.");
+						
+						// Anything not already considered as a co-address is now a co-address
+						if (!coAddressMap.contains(firstNode))
+						{
+							coAddressMap.add(firstNode);
+						}
+						if (!coAddressMap.contains(other))
+						{
+							coAddressMap.add(other);
+						}
+					}
+				}
+				
+				numCoAddresses = coAddressMap.size();
+				
+				// Free memory for garbage collector
+				coAddressMap.clear();
+				coAddressMap = null;
+				
+				// Now we write our results for these addresses
+				displayAddressResults (year, day, hash, income, amountSent, numNeighbours, numCoAddresses);
 			}
 			else if (node instanceof Transaction)
 			{
 				++totalNumTransactions;
-				
-				// Check for co-addresses of this transaction
-				Object[] inEdges = graph.getInEdges(node).toArray();
-				int firstNode = -1;
-				
-				if (inEdges.length > 0)
-					firstNode = (int)inEdges [0];
-				
-				// Every extra inputs on the transaction means there is a co-address
-				// Since two addresses will be inputs to the same address
-				for (int i = 1; i < inEdges.length; i++)
-				{
-					// These should be addresses
-					int other = (int)inEdges [i];
-					GraphNode test = graph.getSource((int)inEdges [i]);
-					
-					if (test instanceof Transaction)
-					{
-						System.err.println ("Assertion ran! ");
-						System.err.println ("Unknown type received");
-						System.exit(0);
-					}
-					
-					// Anything not already considered as a co-address is now a co-address
-					if (!coAddressMap.contains(firstNode))
-					{
-						coAddressMap.add(firstNode);
-					}
-					if (!coAddressMap.contains(other))
-					{
-						coAddressMap.add(other);
-					}
-				}
 			}
 			else {
-				System.err.println ("Assertion ran! ");
-				System.err.println ("Unknown type received");
-				System.exit(0);
+
 			}
 		}
 		
-		System.out.println ("Total ransome addresses in window: " + totalRansomeAddresses);
-		System.out.println ("Total transactions in window: " + totalNumTransactions);
-		System.out.println ("Number of co-addresses in window: " + coAddressMap.size());
+		displayWindowResults (year, day, totalNumTransactions, totalRansomeAddresses, totalWhiteAddresses);
 	}
 	
 	// Extracts the features for a specific year in the dataset
@@ -229,7 +230,7 @@ public class WindowParser extends Parser {
 			fileScOutput = new Scanner (fileStreamOutput, "UTF-8");
 			fileStreamInput = new FileInputStream(FILE_FOLDER + '/' + INPUT_FILE_NAME + MONTHS [monthIndex] + ".txt");
 			fileScInput = new Scanner (fileStreamInput, "UTF-8");
-			System.out.println ("Placed Input/Output files into memory. Now going through the files through each window..");
+			System.out.println ("Going through the files through each window..");
 			
 			} catch (IOException e) {
 				System.err.println("A problem has occurred with trying to load the file. Is the directory correct?");
@@ -280,6 +281,7 @@ public class WindowParser extends Parser {
 			if (wholeLine.isEmpty())
 			{
 				totalWindowsInOutputFiles++;
+				System.out.println ("Completed a day on output file");
 				
 				// Completed execution of this window
 				// Do nothing else
@@ -315,10 +317,6 @@ public class WindowParser extends Parser {
 				// Create address for output of the transaction
 				Address addr = new Address (amountSent, addressHash);
 
-				// Addresses with no hash are not added to our table
-				if (addressHash != "")
-					addAddressToTable(addr);
-
 				// Add information to the graph
 				graph.addVertex(addr);
 				graph.addEdge(edgeCount++, trans, addr);
@@ -331,6 +329,8 @@ public class WindowParser extends Parser {
 
 	private void parseInputFiles (int year, int month, Scanner fileSc, Graph<GraphNode, Integer> graph)
 	{
+		transactions.clear();
+		
 		int edgeCount = graph.getEdgeCount ();
 		Transaction firstTrans = null; // For getting the day
 		
@@ -341,6 +341,11 @@ public class WindowParser extends Parser {
 			// Next 'window'
 			if (wholeLine.isEmpty())
 			{
+				//System.out.println ("Memory check");
+				//System.out.println ("Scanner: " + ObjectSizeFetcher.getObjectSize(fileSc));
+				//System.out.println ("Graph: " + ObjectSizeFetcher.getObjectSize(graph));
+				//System.out.println ("Trans table: " + ObjectSizeFetcher.getObjectSize(transactions));
+				
 				totalWindowsInInputFiles++;
 				
 				if (firstTrans != null)
@@ -472,6 +477,52 @@ public class WindowParser extends Parser {
 		System.gc();
 	}
 	
+	// x must be true
+	private void assertBool(boolean x, String msg)
+	{
+		if (!x)
+		{
+			System.err.println ("Assertion ran! ");
+			System.err.println (msg);
+			System.exit(0);
+		}
+	}
+	
+	private double getIncome (Address address, GraphNode sender,  Graph<GraphNode, Integer> graph)
+	{
+		double res = 0.0d;
+		Collection<Integer> outEdges = graph.getOutEdges(sender);
+		
+		// Calculate income
+		for (Integer i : outEdges)
+		{
+			GraphNode input = graph.getDest(i);
+			
+			if (input instanceof Transaction)
+			{
+				System.err.println ("Assertion ran! ");
+				System.err.println ("Transaction is an output to an address?");
+				System.exit(0);
+			}
+			else
+			{
+				res += ((Address)input).getBtcSent();
+			}
+		}
+		
+		return res;
+	}
+	
+	// Example method, returns true if it is a ransomeware address
+	// Returns the label
+	private String isRansomeWareAddress(String hash, int year, int day)
+	{
+		// Please do not complete this method
+		// Write it in a different class
+		// This is temporary
+		return "";
+	}
+	
 	// Adding a transaction to the hashTable
 	private Transaction addTransactionToTable(int time, String transHash)
 	{
@@ -484,14 +535,6 @@ public class WindowParser extends Parser {
 		transactions.put(transHash, newTrans);
 
 		return newTrans;
-	}
-	
-	// Adding a address to the hashTable
-	private Address addAddressToTable(Address addr)
-	{
-		//addresses.put(addr.getAddrHash(), addr);
-
-		return addr;
 	}
 
 	// Getting a transaction from the hashtable

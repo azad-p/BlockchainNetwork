@@ -387,7 +387,7 @@ public class WindowParser extends Parser {
 	}
 	
 	private void parseOutputFiles (Scanner fileSc, Graph<GraphNode, Integer> graph)
-	{	
+	{
 		int edgeCount = graph.getEdgeCount();
 
 		while (fileSc.hasNextLine()) {
@@ -398,7 +398,6 @@ public class WindowParser extends Parser {
 			if (wholeLine.isEmpty())
 			{
 				totalWindowsInOutputFiles++;
-				System.out.println ("Completed a day on output file");
 				
 				// Completed execution of this window
 				// Do nothing else
@@ -406,12 +405,13 @@ public class WindowParser extends Parser {
 				// This way we link them first
 				return;
 			}
-				
-			Scanner lineSc = new Scanner(wholeLine);
+			
+			String[] lineInfo = wholeLine.split("\t");
 
-			int time = lineSc.nextInt();
-			String transHash = lineSc.next().intern();
-
+			int time = Integer.parseInt(lineInfo [0]);
+			String transHash = lineInfo [1].intern();
+			int lineIndex = 2;
+			
 			Transaction trans = getTransFromTable(transHash);
 
 			if (trans == null) {
@@ -420,17 +420,19 @@ public class WindowParser extends Parser {
 			}
 
 			// Create each address that is an output to this transaction
-			while (lineSc.hasNext())
+			while (lineIndex < lineInfo.length)
 			{
-				String addressHash = lineSc.next().intern();
+				String addressHash = lineInfo[lineIndex].intern();
+				++lineIndex;
 
 				// Do not store 'no address' hashes. Just use an empty string.
 				// Just to save memory. We don't need it anyways.
 				if (addressHash.charAt(0) == 'n')
 					addressHash = "";
 				
-				long amountSent = lineSc.nextLong();
-
+				long amountSent = Long.parseLong(lineInfo[lineIndex]);
+				++lineIndex;
+				
 				// Create address for output of the transaction
 				Address addr = new Address (amountSent, addressHash);
 
@@ -439,8 +441,7 @@ public class WindowParser extends Parser {
 				graph.addEdge(edgeCount++, trans, addr);
 			}
 			
-			lineSc.close();
-			lineSc = null;
+			lineInfo = null;
 		}
 	}
 
@@ -458,11 +459,6 @@ public class WindowParser extends Parser {
 			// Next 'window'
 			if (wholeLine.isEmpty())
 			{
-				//System.out.println ("Memory check");
-				//System.out.println ("Scanner: " + ObjectSizeFetcher.getObjectSize(fileSc));
-				//System.out.println ("Graph: " + ObjectSizeFetcher.getObjectSize(graph));
-				//System.out.println ("Trans table: " + ObjectSizeFetcher.getObjectSize(transactions));
-				
 				totalWindowsInInputFiles++;
 				
 				if (firstTrans != null)
@@ -482,10 +478,13 @@ public class WindowParser extends Parser {
 				// Complete execution of this window 
 				return;
 			}
-			Scanner lineSc = new Scanner(wholeLine);
+			
+			String[] lineInfo = wholeLine.split("\t");
 
-			int transactionTime = lineSc.nextInt();
-			String transactionHash = lineSc.next().intern();
+			int transactionTime = Integer.parseInt(lineInfo [0]);
+			String transactionHash = lineInfo [1].intern();
+			int lineIndex = 2;
+			
 			Transaction trans = getTransFromTable(transactionHash);
 
 			if (trans != null) {
@@ -503,10 +502,13 @@ public class WindowParser extends Parser {
 				firstTrans = trans;
 			
 			// Check all of the transactions inputs
-			while (lineSc.hasNext()) {
-				String inputHash = lineSc.next().intern();
-				short indexOfInput = lineSc.nextShort();
-
+			while (lineIndex < lineInfo.length) {
+				String inputHash = lineInfo[lineIndex].intern();
+				++lineIndex;
+				
+				short indexOfInput = Short.parseShort(lineInfo [lineIndex]);
+				++lineIndex;
+				
 				Transaction inputTrans = getTransFromTable(inputHash);
 
 				if (inputTrans == null) {
@@ -566,8 +568,7 @@ public class WindowParser extends Parser {
 				graph.addEdge(edgeCount++, address, trans);
 			}
 			
-			lineSc.close();
-			lineSc = null;
+			lineInfo = null;
 		}
 	}
 

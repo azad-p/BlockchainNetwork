@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Scanner;
 
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
@@ -22,8 +24,8 @@ import edu.uci.ics.jung.graph.Graph;
 // Sorted files should be placed in the folder sortedFile/ with the corresponding name: Sorted_{input or output}{year}_{month}
 public class WindowParser extends Parser {
 
-	private final HashMap<String, Transaction> transactions;
-	private final HashMap<String, Address> addresses;
+	private final HashMap<String, Transaction> transactions; // FIXME perhaps use Integer, Transactions, where int is the index in graph ?
+	//private final HashMap<String, Address> addresses;
 
 	private byte[] MONTHS;
 	
@@ -36,7 +38,7 @@ public class WindowParser extends Parser {
 	
 		this.WHITE_ADDR_LIMIT = ADDR_LIMIT;
 		this.transactions = new HashMap<String, Transaction>(HASH_SET_SIZE_INIT, 1.0f);
-		this.addresses = new HashMap<String, Address>(HASH_SET_SIZE_INIT, 1.0f);
+		//this.addresses = new HashMap<String, Address>(HASH_SET_SIZE_INIT, 1.0f);
 		this.MONTHS = MONTHS_TO_EXTRACT_FEATURES;
 	}
 	
@@ -108,6 +110,8 @@ public class WindowParser extends Parser {
 	// These are features of a specific window
 	private void getFeaturesFromGraph(int year, int day, Graph<GraphNode, Integer> graph)
 	{
+		HashSet<Integer> coAddressMap = new HashSet<Integer>(150); // Place co-addresses here
+																   // Stores the index in the graph
 		Collection<GraphNode> vertices = graph.getVertices();
 		
 		int totalNumTransactions = 0;
@@ -123,11 +127,13 @@ public class WindowParser extends Parser {
 				
 				if (isRansomeWareAddress (hash, year, day) == null)
 				{
-					// Don't bother extracting features for all these extra white addresses
-					if (totalWhiteAddresses >= WHITE_ADDR_LIMIT)
-						continue;
-					
 					++totalWhiteAddresses;
+					
+					// Don't bother extracting features for all these extra white addresses
+					// We won't be storing it anyway.
+					// Only grab features that we will use
+					if (totalWhiteAddresses > WHITE_ADDR_LIMIT)
+						continue;
 				}
 				else
 				{
@@ -151,6 +157,39 @@ public class WindowParser extends Parser {
 			else if (node instanceof Transaction)
 			{
 				++totalNumTransactions;
+				
+				// Check for co-addresses of this transaction
+				Object[] inEdges = graph.getInEdges(node).toArray();
+				int firstNode = -1;
+				
+				if (inEdges.length > 0)
+					firstNode = (int)inEdges [0];
+				
+				// Every extra inputs on the transaction means there is a co-address
+				// Since two addresses will be inputs to the same address
+				for (int i = 1; i < inEdges.length; i++)
+				{
+					// These should be addresses
+					int other = (int)inEdges [i];
+					GraphNode test = graph.getSource((int)inEdges [i]);
+					
+					if (test instanceof Transaction)
+					{
+						System.err.println ("Assertion ran! ");
+						System.err.println ("Unknown type received");
+						System.exit(0);
+					}
+					
+					// Anything not already considered as a co-address is now a co-address
+					if (!coAddressMap.contains(firstNode))
+					{
+						coAddressMap.add(firstNode);
+					}
+					if (!coAddressMap.contains(other))
+					{
+						coAddressMap.add(other);
+					}
+				}
 			}
 			else {
 				System.err.println ("Assertion ran! ");
@@ -161,6 +200,7 @@ public class WindowParser extends Parser {
 		
 		System.out.println ("Total ransome addresses in window: " + totalRansomeAddresses);
 		System.out.println ("Total transactions in window: " + totalNumTransactions);
+		System.out.println ("Number of co-addresses in window: " + coAddressMap.size());
 	}
 	
 	// Extracts the features for a specific year in the dataset
@@ -426,7 +466,7 @@ public class WindowParser extends Parser {
 		
 		graph = null;
 		
-		addresses.clear();
+		//addresses.clear();
 		transactions.clear();
 		
 		System.gc();
@@ -449,7 +489,7 @@ public class WindowParser extends Parser {
 	// Adding a address to the hashTable
 	private Address addAddressToTable(Address addr)
 	{
-		addresses.put(addr.getAddrHash(), addr);
+		//addresses.put(addr.getAddrHash(), addr);
 
 		return addr;
 	}

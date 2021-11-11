@@ -6,8 +6,7 @@ public class MainClass {
 	static final int YEAR = 2009;
 	
 	// How many white addresses are considered
-	// We reduced this to 500 instead of 1000, just to save space more
-	static final int WHITE_ADDRESS_LIMIT = 500;
+	static final int WHITE_ADDRESS_LIMIT = 1000;
 	
 	// Set this to true for Part B of the assignment
 	// False for part A of the assignment

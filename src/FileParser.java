@@ -205,8 +205,7 @@ public class FileParser extends Parser {
 							// Address was not found in the output files for this year
 							// Create a dummy address to mimic the transaction. Note that, the btc will not be known
 							
-							// FIXME Use prev transaction hash instead of year
-							address = Address.createDummyAddress(indexOfInput, YEAR_OF_DATASET);
+							address = Address.createDummyAddress(inputHash, indexOfInput, YEAR_OF_DATASET);
 						}
 						else {
 
@@ -220,7 +219,7 @@ public class FileParser extends Parser {
 
 							if (outputs == null || outputs.size() == 0 || outputs.size() <= indexOfInput)
 							{
-								address = Address.createDummyAddress(indexOfInput, YEAR_OF_DATASET);
+								address = Address.createDummyAddress(inputHash, indexOfInput, YEAR_OF_DATASET);
 							}
 							else
 							{

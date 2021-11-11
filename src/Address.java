@@ -12,13 +12,13 @@ public class Address extends GraphNode {
     // Creates a dummy address [SPECIAL CASE]
     // These are ones that may have been created at a later year than the transaction itself
     // Thus, we do not know how much bitcoin was sent, although, we do know who is receiving and sending the address
-    public static Address createDummyAddress (int indexOfTransaction, int year)
+    public static Address createDummyAddress (String prevTrans, int indexOfTransaction, int year)
     {
         Address dummyAddress = new Address ();
         dummyAddress.btcSent = 0; // Undefined, we cannot know this, maybe in a different year
 
         // Custom hash of the address
-        dummyAddress.addrHash = indexOfTransaction + " in " + year;
+        dummyAddress.addrHash = prevTrans + ':' + indexOfTransaction + " in " + year;
 
         return dummyAddress;
     }

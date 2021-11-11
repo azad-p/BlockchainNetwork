@@ -524,8 +524,7 @@ public class WindowParser extends Parser {
 					// Address was not found in the output files for this year
 					// Create a dummy address to mimic the transaction. Note that, the btc will not be known
 					
-					// FIXME Use prev transaction hash instead of year
-					address = Address.createDummyAddress(indexOfInput, year);
+					address = Address.createDummyAddress(inputHash, indexOfInput, year);
 				}
 				else {
 
@@ -542,7 +541,7 @@ public class WindowParser extends Parser {
 					// In this case, outputs.size() < indedxOfInput would be true
 					if (outputs == null || outputs.size() == 0 || outputs.size() <= indexOfInput)
 					{
-						address = Address.createDummyAddress(indexOfInput, year);
+						address = Address.createDummyAddress(inputHash, indexOfInput, year);
 					}
 					else
 					{

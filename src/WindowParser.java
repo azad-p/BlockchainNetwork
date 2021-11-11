@@ -1,4 +1,6 @@
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -22,12 +24,18 @@ import edu.uci.ics.jung.graph.Graph;
 // Sorted files should be placed in the folder sortedFile/ with the corresponding name: Sorted_{input or output}{year}_{month}
 public class WindowParser extends Parser {
 
+	// Set to true if you wish to print the results to the console
+	private final boolean PRINT_RESULTS = false;
+	
 	private final HashMap<String, Transaction> transactions; // FIXME perhaps use Integer, Transactions, where int is the index in graph ?
 
 	private byte[] MONTHS;
 	
 	final int WHITE_ADDR_LIMIT; // Limit of white addresses that we consider per window
 	int totalWindowsInOutputFiles, totalWindowsInInputFiles;
+	
+	// FIXME writer to the file of the MONTHS, so that we dont override eachother
+	String writeToFile = "results/featureExtraction.csv";
 	
 	WindowParser (byte[] MONTHS_TO_EXTRACT_FEATURES, int ADDR_LIMIT)
 	{
@@ -40,6 +48,36 @@ public class WindowParser extends Parser {
 	
 	public void beginFeatureExtractions(int YEAR_OF_DATASET)
 	{
+		try {
+			
+			// Will create and reset the file
+			FileWriter reset = new FileWriter(writeToFile, false);
+			reset.append("Note: Window features are placed at the end of the addresses for that window [Final column for the day].\n\n");
+			reset.append("Address");
+			reset.append(",");
+			reset.append("Year");
+			reset.append(",");
+			reset.append("Day");
+			reset.append(",");
+			reset.append("Amount Sent");
+			reset.append(",");
+			reset.append("Income");
+			reset.append(",");
+			reset.append("Neighbours");
+			reset.append(",");
+			reset.append("CoAddresses");
+			reset.append(",");
+			reset.append("Is Randsome");
+			
+			reset.close();
+			reset = null;
+			
+		} catch (IOException e) {
+			System.out.println ("Cannot writer results");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
 		// Initialize any features
 		totalWindowsInOutputFiles = 0;
 		totalWindowsInInputFiles = 0;
@@ -47,20 +85,24 @@ public class WindowParser extends Parser {
 		extractFeatures (YEAR_OF_DATASET);
 	}
 	
-	private void displayAddressResults(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses)
+	private void displayAddressResults(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, boolean isRansome, BufferedWriter writer)
 	{
-		printFeatures(hash, income, amountSent, numNeighbours, numCoAddresses);
-		writeAddressFeatures(year, day, hash, income, amountSent, numNeighbours, numCoAddresses);
+		if (PRINT_RESULTS)
+			printFeatures(hash, income, amountSent, numNeighbours, numCoAddresses, isRansome);
+		
+		writeAddressFeatures(year, day, hash, income, amountSent, numNeighbours, numCoAddresses, isRansome, writer);
 	}
 	
-	private void displayWindowResults(int year, int day, int totalTrans, int numRansomeAddresses, int numWhiteAddresses)
+	private void displayWindowResults(int year, int day, int totalTrans, int numRansomeAddresses, int numWhiteAddresses, BufferedWriter writer)
 	{
-		printWindow(year, day, totalTrans, numRansomeAddresses, numWhiteAddresses);
-		writeWindowFeatures(year, day, totalTrans, numRansomeAddresses, numWhiteAddresses);
+		if (PRINT_RESULTS)
+			printWindow(year, day, totalTrans, numRansomeAddresses, numWhiteAddresses);
+		
+		writeWindowFeatures(year, day, totalTrans, numRansomeAddresses, numWhiteAddresses, writer);
 	}
 	
 	// Print some of the features to the console
-	private void printFeatures(String hash, double income, long amountSent, int numNeighbours, int numCoAddresses)
+	private void printFeatures(String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, boolean isRansome)
 	{
 		System.out.println ("Total windows in output file: " + totalWindowsInOutputFiles);
 		System.out.println ("Total windows in input file: " + totalWindowsInInputFiles);
@@ -68,6 +110,7 @@ public class WindowParser extends Parser {
 		System.out.println ("Amount sent: " + amountSent);
 		System.out.println ("Neighbours: " + numNeighbours);
 		System.out.println ("CoAddresses: " + numCoAddresses);
+		System.out.println ("Is ransome address: " + isRansome);
 	}
 	
 	private void printWindow(int year, int day, int totalTrans, int numRansome, int numWhite)
@@ -78,15 +121,65 @@ public class WindowParser extends Parser {
 	}
 	
 	// Write our final results to a csv file
-	private void writeAddressFeatures(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses)
+	private void writeAddressFeatures(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, boolean isRansome, BufferedWriter writer)
 	{
-		// TODO: Write results
+		try {
+			writer.append("\n");
+			writer.append(hash);
+			writer.append(",");
+			writer.append("" + year);
+			writer.append(",");
+			writer.append("" + day);
+			writer.append(",");
+			writer.append("" + amountSent);
+			writer.append(",");
+			writer.append("" + income);
+			writer.append(",");
+			writer.append("" + numNeighbours);
+			writer.append(",");
+			writer.append("" + numCoAddresses);
+			writer.append(",");
+			writer.append("" + isRansome);
+			
+			writer.flush();
+		} catch (IOException e) {
+			System.out.println ("Could not write results to file.");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
 	}
 	
 	// Write our final results to a csv file
-	private void writeWindowFeatures(int year, int day, int totalTrans, int numRansomeAddresses, int numWhiteAddresses)
+	private void writeWindowFeatures(int year, int day, int totalTrans, int numRansomeAddresses, int numWhiteAddresses, BufferedWriter writer)
 	{
-		// TODO: Write results
+		try {
+			writer.append("\n");
+			writer.append("~~~~ Features of the above window ~~~~");
+			writer.append("\n");
+			writer.append(",");
+			writer.append("" + year);
+			writer.append(",");
+			writer.append("" + day);
+			writer.append(",");
+			writer.append(",");
+			writer.append(",");
+			writer.append(",");
+			writer.append(",");
+			writer.append(",");
+			writer.append("Total transactions in window: " + totalTrans);
+			writer.append(",");
+			writer.append("Ransome addresses in window: " + numRansomeAddresses);
+			writer.append(",");
+			writer.append("White addresses in window: " + numWhiteAddresses);
+			writer.append("\n");
+			
+			writer.flush();
+		} catch (IOException e) {
+			System.out.println ("Could not write results to file.");
+			e.printStackTrace();
+			System.exit(0);
+		}
 	}
 	
 	
@@ -101,6 +194,19 @@ public class WindowParser extends Parser {
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		int totalNumTransactions = 0;
 		int totalWhiteAddresses = 0, totalRansomeAddresses = 0;
+		BufferedWriter writer = null;
+		
+		try {
+			
+			writer = new BufferedWriter(new FileWriter(writeToFile, true));
+			
+		} catch (IOException e) {
+			System.out.println ("Could not write results.");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		assertBool (writer != null, "Writer was not defined");
 		
 		for (GraphNode node : vertices)
 		{
@@ -109,8 +215,9 @@ public class WindowParser extends Parser {
 				Address adr = (Address)node;
 				
 				String hash = adr.getAddrHash();
+				boolean ransomeWare = isRansomeWareAddress (hash, year, day) != null;
 				
-				if (isRansomeWareAddress (hash, year, day) == null)
+				if (!ransomeWare)
 				{
 					++totalWhiteAddresses;
 					
@@ -190,7 +297,7 @@ public class WindowParser extends Parser {
 				coAddressMap = null;
 				
 				// Now we write our results for these addresses
-				displayAddressResults (year, day, hash, income, amountSent, numNeighbours, numCoAddresses);
+				displayAddressResults (year, day, hash, income, amountSent, numNeighbours, numCoAddresses, ransomeWare, writer);
 			}
 			else if (node instanceof Transaction)
 			{
@@ -201,7 +308,17 @@ public class WindowParser extends Parser {
 			}
 		}
 		
-		displayWindowResults (year, day, totalNumTransactions, totalRansomeAddresses, totalWhiteAddresses);
+		displayWindowResults (year, day, totalNumTransactions, totalRansomeAddresses, totalWhiteAddresses, writer);
+		
+		try {
+			writer.close();
+		} catch (IOException e) {
+			System.out.println ("Failed to close buffer");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		writer = null;
 	}
 	
 	// Extracts the features for a specific year in the dataset

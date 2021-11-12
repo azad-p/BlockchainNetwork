@@ -1,7 +1,10 @@
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.YearMonth;
@@ -13,8 +16,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Scanner;
-
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -69,6 +70,7 @@ public class WindowParser extends Parser {
 			reset.append(",");
 			reset.append("Is Randsome");
 			
+			reset.flush();
 			reset.close();
 			reset = null;
 			
@@ -262,7 +264,7 @@ public class WindowParser extends Parser {
 					
 					assertBool (trans instanceof Transaction, "Address should be sending to a transaction.");
 					
-					Object[] edgesArr = graph.getOutEdges(trans).toArray();
+					Object[] edgesArr = graph.getInEdges(trans).toArray();
 					int firstNode = -1;
 					
 					if (edgesArr.length > 0)
@@ -311,6 +313,7 @@ public class WindowParser extends Parser {
 		displayWindowResults (year, day, totalNumTransactions, totalRansomeAddresses, totalWhiteAddresses, writer);
 		
 		try {
+			writer.flush();
 			writer.close();
 		} catch (IOException e) {
 			System.out.println ("Failed to close buffer");
@@ -332,10 +335,10 @@ public class WindowParser extends Parser {
 		final String INPUT_FILE_NAME = "Sorted_inputs" + YEAR_OF_DATASET + '_';
 		final String OUTPUT_FILE_NAME = "Sorted_outputs" + YEAR_OF_DATASET + '_';
 		
-		FileInputStream fileStreamOutput = null;
-		Scanner fileScOutput = null;
-		FileInputStream fileStreamInput = null;
-		Scanner fileScInput = null;
+		InputStream fileStreamOutput = null;
+		BufferedReader fileScOutput = null;
+		InputStream fileStreamInput = null;
+		BufferedReader fileScInput = null;
 		
 		for (int monthIndex = 0; monthIndex < MONTHS.length; ++monthIndex)
 		{
@@ -344,9 +347,9 @@ public class WindowParser extends Parser {
 			try {
 				
 			fileStreamOutput = new FileInputStream(FILE_FOLDER + '/' + OUTPUT_FILE_NAME + MONTHS [monthIndex] + ".txt");
-			fileScOutput = new Scanner (fileStreamOutput, "UTF-8");
+			fileScOutput = new BufferedReader (new InputStreamReader (fileStreamOutput));
 			fileStreamInput = new FileInputStream(FILE_FOLDER + '/' + INPUT_FILE_NAME + MONTHS [monthIndex] + ".txt");
-			fileScInput = new Scanner (fileStreamInput, "UTF-8");
+			fileScInput = new BufferedReader (new InputStreamReader (fileStreamInput));
 			System.out.println ("Going through the files through each window..");
 			
 			} catch (IOException e) {
@@ -368,8 +371,6 @@ public class WindowParser extends Parser {
 				parseInputFiles (YEAR_OF_DATASET, MONTHS [monthIndex], fileScInput, graph); // Links input file with output file
 				
 				deallocateMemory(fileStreamOutput, fileScOutput, fileStreamInput, fileScInput, graph, true);
-				if (!fileScOutput.hasNextLine() && !fileScInput.hasNextLine())
-					break;
 			}
 			
 			// Close all files
@@ -386,195 +387,206 @@ public class WindowParser extends Parser {
 		}
 	}
 	
-	private void parseOutputFiles (Scanner fileSc, Graph<GraphNode, Integer> graph)
+	private void parseOutputFiles (BufferedReader fileSc, Graph<GraphNode, Integer> graph)
 	{
 		int edgeCount = graph.getEdgeCount();
-
-		while (fileSc.hasNextLine()) {
-			
-			String wholeLine = fileSc.nextLine();
-			
-			// Next 'window'
-			if (wholeLine.isEmpty())
-			{
-				totalWindowsInOutputFiles++;
+		String wholeLine;
+		
+		try {
+			while ((wholeLine = fileSc.readLine()) != null) {
+				transactions.clear();
 				
-				// Completed execution of this window
-				// Do nothing else
-				// Feature extraction step is done when parsing the input files
-				// This way we link them first
-				return;
-			}
-			
-			String[] lineInfo = wholeLine.split("\t");
-
-			int time = Integer.parseInt(lineInfo [0]);
-			String transHash = lineInfo [1].intern();
-			int lineIndex = 2;
-			
-			Transaction trans = getTransFromTable(transHash);
-
-			if (trans == null) {
-				trans = addTransactionToTable(time, transHash);
-				graph.addVertex(trans);
-			}
-
-			// Create each address that is an output to this transaction
-			while (lineIndex < lineInfo.length)
-			{
-				String addressHash = lineInfo[lineIndex].intern();
-				++lineIndex;
-
-				// Do not store 'no address' hashes. Just use an empty string.
-				// Just to save memory. We don't need it anyways.
-				if (addressHash.charAt(0) == 'n')
-					addressHash = "";
+				// Next 'window'
+				if (wholeLine.isEmpty())
+				{
+					totalWindowsInOutputFiles++;
+					
+					// Completed execution of this window
+					// Do nothing else
+					// Feature extraction step is done when parsing the input files
+					// This way we link them first
+					return;
+				}
 				
-				long amountSent = Long.parseLong(lineInfo[lineIndex]);
-				++lineIndex;
-				
-				// Create address for output of the transaction
-				Address addr = new Address (amountSent, addressHash);
+				String[] lineInfo = wholeLine.split("\t");
 
-				// Add information to the graph
-				graph.addVertex(addr);
-				graph.addEdge(edgeCount++, trans, addr);
+				int time = Integer.parseInt(lineInfo [0]);
+				String transHash = lineInfo [1].intern();
+				int lineIndex = 2;
+				
+				Transaction trans = getTransFromTable(transHash);
+
+				if (trans == null) {
+					trans = addTransactionToTable(time, transHash);
+					graph.addVertex(trans);
+				}
+
+				// Create each address that is an output to this transaction
+				while (lineIndex < lineInfo.length)
+				{
+					String addressHash = lineInfo[lineIndex].intern();
+					++lineIndex;
+
+					// Do not store 'no address' hashes. Just use an empty string.
+					// Just to save memory. We don't need it anyways.
+					if (addressHash.charAt(0) == 'n')
+						addressHash = "";
+					
+					long amountSent = Long.parseLong(lineInfo[lineIndex]);
+					++lineIndex;
+					
+					// Create address for output of the transaction
+					Address addr = new Address (amountSent, addressHash);
+
+					// Add information to the graph
+					graph.addVertex(addr);
+					graph.addEdge(edgeCount++, trans, addr);
+				}
+				
+				lineInfo = null;
 			}
-			
-			lineInfo = null;
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
-	private void parseInputFiles (int year, int month, Scanner fileSc, Graph<GraphNode, Integer> graph)
+	private void parseInputFiles (int year, int month, BufferedReader fileSc, Graph<GraphNode, Integer> graph)
 	{
 		transactions.clear();
 		
 		int edgeCount = graph.getEdgeCount ();
 		Transaction firstTrans = null; // For getting the day
+		String wholeLine;
 		
-		while (fileSc.hasNextLine()) {
-			
-			String wholeLine = fileSc.nextLine();
-			
-			// Next 'window'
-			if (wholeLine.isEmpty())
-			{
-				totalWindowsInInputFiles++;
+		try {
+			while ((wholeLine = fileSc.readLine()) != null) {
 				
-				if (firstTrans != null)
+				// Next 'window'
+				if (wholeLine.isEmpty())
 				{
-					// Obtained from https://stackoverflow.com/questions/45392163/java-get-current-day-from-unix-timestamp
-					// Get the current day from a unix time
-					int dayOfMonth = Integer.parseInt(new SimpleDateFormat("dd").format(new Date(firstTrans.getTimeOfTransaction() * 1000L)));
-					int dayOfYear = (new GregorianCalendar (year, month - 1, dayOfMonth)).get (Calendar.DAY_OF_YEAR);
+					totalWindowsInInputFiles++;
 					
-					System.out.println ("Getting features for the window: year " + year + " day " + dayOfYear);
+					if (firstTrans != null)
+					{
+						// Obtained from https://stackoverflow.com/questions/45392163/java-get-current-day-from-unix-timestamp
+						// Get the current day from a unix time
+						int dayOfMonth = Integer.parseInt(new SimpleDateFormat("dd").format(new Date(firstTrans.getTimeOfTransaction() * 1000L)));
+						int dayOfYear = (new GregorianCalendar (year, month - 1, dayOfMonth)).get (Calendar.DAY_OF_YEAR);
+						
+						System.out.println ("Getting features for the window: year " + year + " day " + dayOfYear);
+						
+						// Extract features from this window
+						getFeaturesFromGraph (year, dayOfYear, graph);
+						firstTrans = null;
+					}
 					
-					// Extract features from this window
-					getFeaturesFromGraph (year, dayOfYear, graph);
-					firstTrans = null;
+					// Complete execution of this window 
+					return;
 				}
 				
-				// Complete execution of this window 
-				return;
-			}
-			
-			String[] lineInfo = wholeLine.split("\t");
+				String[] lineInfo = wholeLine.split("\t");
 
-			int transactionTime = Integer.parseInt(lineInfo [0]);
-			String transactionHash = lineInfo [1].intern();
-			int lineIndex = 2;
-			
-			Transaction trans = getTransFromTable(transactionHash);
-
-			if (trans != null) {
-				// Transaction is already in the hashTable
-				// Just update any of its information
-				trans.setTimeOfTransaction(transactionTime);
-			} else {
-				// Transaction is not in the Hashtable
-				// Create the class, update any of its information, and add it to the Hashtable
-				trans = addTransactionToTable(transactionTime, transactionHash);
-				graph.addVertex(trans);
-			}
-			
-			if (firstTrans == null)
-				firstTrans = trans;
-			
-			// Check all of the transactions inputs
-			while (lineIndex < lineInfo.length) {
-				String inputHash = lineInfo[lineIndex].intern();
-				++lineIndex;
+				int transactionTime = Integer.parseInt(lineInfo [0]);
+				String transactionHash = lineInfo [1].intern();
+				int lineIndex = 2;
 				
-				short indexOfInput = Short.parseShort(lineInfo [lineIndex]);
-				++lineIndex;
-				
-				Transaction inputTrans = getTransFromTable(inputHash);
+				Transaction trans = getTransFromTable(transactionHash);
 
-				if (inputTrans == null) {
+				if (trans != null) {
+					// Transaction is already in the hashTable
+					// Just update any of its information
+					trans.setTimeOfTransaction(transactionTime);
+				} else {
 					// Transaction is not in the Hashtable
 					// Create the class, update any of its information, and add it to the Hashtable
-					// Then link them together
-					inputTrans = addTransactionToTable(-1, inputHash);
-					graph.addVertex(inputTrans);
+					trans = addTransactionToTable(transactionTime, transactionHash);
+					graph.addVertex(trans);
 				}
-
-				Address address = null;
-				if (graph.getOutEdges(inputTrans) == null)
-				{
-					// Special case
-					// Address was not found in the output files for this year
-					// Create a dummy address to mimic the transaction. Note that, the btc will not be known
+				
+				if (firstTrans == null)
+					firstTrans = trans;
+				
+				// Check all of the transactions inputs
+				while (lineIndex < lineInfo.length) {
+					String inputHash = lineInfo[lineIndex].intern();
+					++lineIndex;
 					
-					address = Address.createDummyAddress(inputHash, indexOfInput, year);
-				}
-				else {
+					short indexOfInput = Short.parseShort(lineInfo [lineIndex]);
+					++lineIndex;
+					
+					Transaction inputTrans = getTransFromTable(inputHash);
 
-					// Output edges exist
+					if (inputTrans == null) {
+						// Transaction is not in the Hashtable
+						// Create the class, update any of its information, and add it to the Hashtable
+						// Then link them together
+						inputTrans = addTransactionToTable(-1, inputHash);
+						graph.addVertex(inputTrans);
+					}
 
-					Collection<Integer> outputs = graph.getOutEdges(inputTrans);
-
-					// Sort the outputs by their index in the graph
-					ArrayList<Integer> outputsSorted = new ArrayList<Integer>(outputs);
-					Collections.sort(outputsSorted);
-
-					// Do not have an index for this output
-					// Can occur if there was multiple index's from the input file but none were in the output file
-					// In this case, outputs.size() < indedxOfInput would be true
-					if (outputs == null || outputs.size() == 0 || outputs.size() <= indexOfInput)
+					Address address = null;
+					if (graph.getOutEdges(inputTrans) == null)
 					{
+						// Special case
+						// Address was not found in the output files for this year
+						// Create a dummy address to mimic the transaction. Note that, the btc will not be known
+						
 						address = Address.createDummyAddress(inputHash, indexOfInput, year);
 					}
-					else
-					{
-						GraphNode node = graph.getDest(outputsSorted.get(indexOfInput));
+					else {
 
-						if (node instanceof Address) {
-							address = (Address) node;
+						// Output edges exist
+
+						Collection<Integer> outputs = graph.getOutEdges(inputTrans);
+
+						// Sort the outputs by their index in the graph
+						ArrayList<Integer> outputsSorted = new ArrayList<Integer>(outputs);
+						Collections.sort(outputsSorted);
+
+						// Do not have an index for this output
+						// Can occur if there was multiple index's from the input file but none were in the output file
+						// In this case, outputs.size() < indedxOfInput would be true
+						if (outputs == null || outputs.size() == 0 || outputs.size() <= indexOfInput)
+						{
+							address = Address.createDummyAddress(inputHash, indexOfInput, year);
 						}
-						else {
-							System.err.println("Error, node is not an address");
-							System.err.println("Exiting on failure");
-							System.exit(0);
+						else
+						{
+							GraphNode node = graph.getDest(outputsSorted.get(indexOfInput));
+
+							if (node instanceof Address) {
+								address = (Address) node;
+							}
+							else {
+								System.err.println("Error, node is not an address");
+								System.err.println("Exiting on failure");
+								System.exit(0);
+							}
 						}
 					}
+
+					// Assertion, address must be initialized before this
+					if (address == null) { System.err.println ("ERROR: Assertion ran. No address associated with the transaction."); System.exit(0); }
+
+					// Link the information together on the graph & data
+					graph.addEdge(edgeCount++, inputTrans, address);
+					graph.addEdge(edgeCount++, address, trans);
 				}
-
-				// Assertion, address must be initialized before this
-				if (address == null) { System.err.println ("ERROR: Assertion ran. No address associated with the transaction."); System.exit(0); }
-
-				// Link the information together on the graph & data
-				graph.addEdge(edgeCount++, inputTrans, address);
-				graph.addEdge(edgeCount++, address, trans);
+				
+				lineInfo = null;
 			}
-			
-			lineInfo = null;
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
 	// De-allocate the memory for this window
 	// If onlyDealocateWindow is true, then we are not deallocating the streams/scanner
-	private void deallocateMemory(FileInputStream fileStreamOutput, Scanner fileScOutput, FileInputStream fileStreamInput, Scanner fileScInput, 
+	private void deallocateMemory(InputStream fileStreamOutput, BufferedReader fileScOutput, InputStream fileStreamInput, BufferedReader fileScInput, 
 			Graph<GraphNode, Integer> graph, boolean onlyDealocateWindow)
 	{
 		// De-allocate all memory for this window

@@ -453,8 +453,6 @@ public class WindowParser extends Parser {
 
 	private void parseInputFiles (int year, int month, BufferedReader fileSc, Graph<GraphNode, Integer> graph)
 	{
-		transactions.clear();
-		
 		int edgeCount = graph.getEdgeCount ();
 		Transaction firstTrans = null; // For getting the day
 		String wholeLine;
@@ -599,7 +597,6 @@ public class WindowParser extends Parser {
 		
 		graph = null;
 		
-		//addresses.clear();
 		transactions.clear();
 		
 		System.gc();

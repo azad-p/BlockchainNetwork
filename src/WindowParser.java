@@ -394,7 +394,6 @@ public class WindowParser extends Parser {
 		
 		try {
 			while ((wholeLine = fileSc.readLine()) != null) {
-				transactions.clear();
 				
 				// Next 'window'
 				if (wholeLine.isEmpty())

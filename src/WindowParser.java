@@ -38,6 +38,8 @@ public class WindowParser extends Parser {
 	// FIXME writer to the file of the MONTHS, so that we dont override eachother
 	String writeToFile = "results/featureExtraction.csv";
 	
+	RansomeCheck checker;
+	
 	WindowParser (byte[] MONTHS_TO_EXTRACT_FEATURES, int ADDR_LIMIT)
 	{
 		final int HASH_SET_SIZE_INIT = 16 * 256;
@@ -68,6 +70,8 @@ public class WindowParser extends Parser {
 			reset.append(",");
 			reset.append("CoAddresses");
 			reset.append(",");
+			reset.append("Successors");
+			reset.append(",");
 			reset.append("Is Randsome");
 			
 			reset.flush();
@@ -84,15 +88,16 @@ public class WindowParser extends Parser {
 		totalWindowsInOutputFiles = 0;
 		totalWindowsInInputFiles = 0;
 		
+		this.checker = new RansomeCheck (YEAR_OF_DATASET);
 		extractFeatures (YEAR_OF_DATASET);
 	}
 	
-	private void displayAddressResults(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, boolean isRansome, BufferedWriter writer)
+	private void displayAddressResults(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, int numSucc, boolean isRansome, BufferedWriter writer)
 	{
 		if (PRINT_RESULTS)
-			printFeatures(hash, income, amountSent, numNeighbours, numCoAddresses, isRansome);
+			printFeatures(hash, income, amountSent, numNeighbours, numCoAddresses, numSucc, isRansome);
 		
-		writeAddressFeatures(year, day, hash, income, amountSent, numNeighbours, numCoAddresses, isRansome, writer);
+		writeAddressFeatures(year, day, hash, income, amountSent, numNeighbours, numCoAddresses, numSucc, isRansome, writer);
 	}
 	
 	private void displayWindowResults(int year, int day, int totalTrans, int numRansomeAddresses, int numWhiteAddresses, BufferedWriter writer)
@@ -104,7 +109,7 @@ public class WindowParser extends Parser {
 	}
 	
 	// Print some of the features to the console
-	private void printFeatures(String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, boolean isRansome)
+	private void printFeatures(String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, int numSucc, boolean isRansome)
 	{
 		System.out.println ("Total windows in output file: " + totalWindowsInOutputFiles);
 		System.out.println ("Total windows in input file: " + totalWindowsInInputFiles);
@@ -112,6 +117,7 @@ public class WindowParser extends Parser {
 		System.out.println ("Amount sent: " + amountSent);
 		System.out.println ("Neighbours: " + numNeighbours);
 		System.out.println ("CoAddresses: " + numCoAddresses);
+		System.out.println ("Successors: " + numSucc);
 		System.out.println ("Is ransome address: " + isRansome);
 	}
 	
@@ -123,7 +129,7 @@ public class WindowParser extends Parser {
 	}
 	
 	// Write our final results to a csv file
-	private void writeAddressFeatures(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, boolean isRansome, BufferedWriter writer)
+	private void writeAddressFeatures(int year, int day, String hash, double income, long amountSent, int numNeighbours, int numCoAddresses, int numSucc, boolean isRansome, BufferedWriter writer)
 	{
 		try {
 			writer.append("\n");
@@ -140,6 +146,8 @@ public class WindowParser extends Parser {
 			writer.append("" + numNeighbours);
 			writer.append(",");
 			writer.append("" + numCoAddresses);
+			writer.append(",");
+			writer.append("" + numSucc);
 			writer.append(",");
 			writer.append("" + isRansome);
 			
@@ -217,7 +225,7 @@ public class WindowParser extends Parser {
 				Address adr = (Address)node;
 				
 				String hash = adr.getAddrHash();
-				boolean ransomeWare = isRansomeWareAddress (hash, year, day) != null;
+				boolean ransomeWare = checker.isRansomeWareAddress (hash, year, day);
 				
 				if (!ransomeWare)
 				{
@@ -241,6 +249,7 @@ public class WindowParser extends Parser {
 				long amountSent = 0;
 				int numNeighbours = 0;
 				int numCoAddresses = 0;
+				int numSuccessors = 0;
 				
 				Collection<Integer> inEdges = graph.getInEdges(adr);
 				double incomeRet = getIncome (adr, graph.getSource((int)(inEdges.toArray())[0]), graph);
@@ -250,6 +259,7 @@ public class WindowParser extends Parser {
 				
 				amountSent = adr.getBtcSent();
 				numNeighbours = graph.getNeighborCount(adr);
+				numSuccessors = graph.getSuccessorCount(adr);
 				
 				// Check for co-addresses of this transaction
 				Iterator<Integer> it = graph.getOutEdges(adr).iterator();
@@ -299,7 +309,7 @@ public class WindowParser extends Parser {
 				coAddressMap = null;
 				
 				// Now we write our results for these addresses
-				displayAddressResults (year, day, hash, income, amountSent, numNeighbours, numCoAddresses, ransomeWare, writer);
+				displayAddressResults (year, day, hash, income, amountSent, numNeighbours, numCoAddresses, numSuccessors, ransomeWare, writer);
 			}
 			else if (node instanceof Transaction)
 			{
@@ -379,7 +389,7 @@ public class WindowParser extends Parser {
 				fileStreamOutput.close();
 				fileScOutput.close();
 				fileStreamInput.close();
-				fileScInput.close();
+				fileScInput.close(); 
 				
 			} catch (IOException e) { e.printStackTrace(); System.exit (0); System.err.println ("Failed to close a file."); }
 			
@@ -636,16 +646,6 @@ public class WindowParser extends Parser {
 		}
 		
 		return res;
-	}
-	
-	// Example method, returns true if it is a ransomeware address
-	// Returns the label
-	private String isRansomeWareAddress(String hash, int year, int day)
-	{
-		// Please do not complete this method
-		// Write it in a different class
-		// This is temporary
-		return "";
 	}
 	
 	// Adding a transaction to the hashTable

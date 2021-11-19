@@ -3,7 +3,7 @@ import java.util.*;
 
 public class MainClass {
 
-	static final int YEAR = 2015;
+	static final int YEAR = 2012;
 	
 	// How many white addresses are considered
 	static final int WHITE_ADDRESS_LIMIT = 1000;

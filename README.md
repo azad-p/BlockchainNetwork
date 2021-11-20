@@ -11,7 +11,7 @@ The jar files for this library have been provided in the main-path of the projec
 
 If the jar files fail, jung-2.0.1 can be downloaded here https://sourceforge.net/projects/jung/files/jung/ 
 
-You may be required to add the jar files to your build path if they are not already added.
+You may be required to `add the jar files to your build path` if they are not already added.
 
 ## Eclipse
 

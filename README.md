@@ -96,7 +96,7 @@ The program extracts the following features for each address, placed in a result
 * The addresses Income
 * Number of neighbours
 * Number of co-addresses
-* Number of successors (0 if no sending transaction within the current window)
+* Number of successors (0 if there is no sending transaction for that address within the current window)
 * If the address is a ransomeware (true/false)
 * Total transactions in a window
 * Number of white & ransome addresses in a window

@@ -31,8 +31,6 @@ The data-set is included in .gitignore, so it MUST be added manually; with the e
 
 MainClass.java contains the main class. Located in the src folder.
 
-* NOTE: This is not requires for Part A. We have removed Jung temporarily for improved memory usage, as we had implemented this in two ways *
-
 ## Output
 
 Some output may be provided as per testing. That is, if you use YEAR = 2009, a transaction will be printed as per testing the result.
@@ -49,7 +47,7 @@ Pass the command -Xmx32768m to the VM to do this.
 
 # Execution times (Part A)
 
-*NOTE* Due to the memory usage we have decided to run on different files from the 2015 dataset.
+`*NOTE*` Due to the memory usage we have decided to run on different files from the 2015 dataset.
 
 This way we can still verify the correctness of the network, and only need to improve our mememory management to run the 2015 dataset.
 
@@ -79,6 +77,8 @@ Milliseconds of total execution: 2307314ms (2307.314 s)
 Poupak Azad
 
 # Ransomware Features (Part B)
+
+The memory usage issues from part A was largely fixed in part B. Part A uses the FileParser class, while part B uses both FileSorter & WindowParser class. The WindowParser is optimized such that memory usage from reading files is limited to a buffers size, the files are pre-sorted, and Scanner's are not used for parsing. The results from part B is a significant improvement to performance, and reduced memory usage overhead compared to part A.
 
 These features are extracted for ransomware payments. 
 Payments are split into 24 hour windows.

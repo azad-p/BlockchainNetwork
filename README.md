@@ -47,12 +47,45 @@ For 2015, you will need to set the heap size to 32768 MB.
 
 Pass the command -Xmx32768m to the VM to do this.
 
-# Execution time (Part A)
+# Execution times (Part A)
 
-# Ransomware Features
+*NOTE* Due to the memory usage we have decided to run on different files from the 2015 dataset.
+
+This way we can still verify the correctness of the network, and only need to improve our mememory management to run the 2015 dataset.
+
+Connor Hryhoruk
+
+CPU: AMD Ryzen 7 2700X
+
+Dataset tested on: 2011
+
+~Execution times [Output from execution] ~
+
+Milliseconds to load output file: 45064ms (45.064 s)
+
+Milliseconds to load input file and link it with output 45965ms (45.965 s)
+
+Milliseconds of total execution: 91029ms (91.029 s)
+
+
+Dataset tested on: 2012
+
+Milliseconds to load output file: 238193ms (238.193 s)
+
+Milliseconds to load input file and link it with output 2069120ms (2069.12 s)
+
+Milliseconds of total execution: 2307314ms (2307.314 s)
+
+Poupak Azad
+
+# Ransomware Features (Part B)
 
 These features are extracted for ransomware payments. 
 Payments are split into 24 hour windows.
+
+To run Part B, you must first sort the input/output files for the given year. To do so, run src/FileSorter.java, set the year to the one which you are sorting. Then set SORT_INPUTS to true or false, where true indicates to sort an input file, as well as MONTH_TO_SORT for the specific month to sort. 
+
+The sorted files should be placed in the sortedFile/ directory.
 
 * Total received amount
 

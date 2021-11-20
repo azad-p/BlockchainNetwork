@@ -101,3 +101,5 @@ The program extracts the following features for each address, placed in a result
 * Total transactions in a window
 * Number of white & ransome addresses in a window
 
+
+`The program should take approximately 30-40 minutes for the 2015 dataset, and 3 minutes for the 2012 dataset`

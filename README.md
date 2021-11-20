@@ -89,7 +89,7 @@ Milliseconds of total execution: 385812ms (385.812 s)
 
 The memory usage issues from part A was largely fixed in part B. Part A uses the FileParser class, while part B uses both FileSorter & WindowParser class. The WindowParser is optimized such that memory usage from reading files is limited to a buffers size, the files are pre-sorted, and Scanner's are not used for parsing. The results from part B is a significant improvement to performance, and reduced memory usage overhead compared to part A.
 
-These features are extracted for ransomware payments. 
+Features are extracted for ransomware payments. 
 Payments are split into 24 hour windows.
 
 To run Part B, you must first sort the input/output files for the given year. To do so, run src/FileSorter.java, set the year to the one which you are sorting. Then set SORT_INPUTS to true or false, where true indicates to sort an input file, as well as MONTH_TO_SORT for the specific month to sort. 

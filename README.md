@@ -76,6 +76,16 @@ Milliseconds of total execution: 2307314ms (2307.314 s)
 
 Poupak Azad
 
+CPU: Intel Core i7-10750
+
+Dataset tested on: 2012
+
+Milliseconds to load output file: 177898ms (177.898 s)
+
+Milliseconds to load input file and link it with output 207913ms (207.913 s)
+
+Milliseconds of total execution: 385812ms (385.812 s)
+
 # Ransomware Features (Part B)
 
 The memory usage issues from part A was largely fixed in part B. Part A uses the FileParser class, while part B uses both FileSorter & WindowParser class. The WindowParser is optimized such that memory usage from reading files is limited to a buffers size, the files are pre-sorted, and Scanner's are not used for parsing. The results from part B is a significant improvement to performance, and reduced memory usage overhead compared to part A.

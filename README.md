@@ -33,7 +33,7 @@ MainClass.java contains the main class. Located in the src folder.
 
 ## Output
 
-Some output may be provided as per testing. That is, if you use YEAR = 2009, a transaction will be printed as per testing the result.
+Some output could be provided as per testing.
 
 # Out of Memory ?
 

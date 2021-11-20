@@ -87,27 +87,17 @@ To run Part B, you must first sort the input/output files for the given year. To
 
 The sorted files should be placed in the sortedFile/ directory.
 
-* Total received amount
+Run src/Mainclass.java, with the cooresponding year and months in the given variables, and set WINDOW_FEATURE_EXTRACTION to true (false is part A).
 
-* Number of transactions in a window
+The program extracts the following features for each address, placed in a results/featureExtraction.csv file:
 
-* Addresses in a label (# of unique addresses and what they are)
-
-* Total neighbors, weight, length, income, loops of an address
-
-* Largest length in a window
-
-* Addresses used as outputs to starter transactions (Length 0)
-
-* Ratio of the total weight of a window to the number of start transactions in a window
-
-* Total loop for each label
-
-* Number of co-spenders (Part A required)
-
-* Number of transitions (Part A required)
-
-* Total number of unique users in network (using co-spenders & transitions) (Part A required)
-
-* Number of ransomware addresses in a window, and total
+* The address and its year/day
+* Amount sent by the address
+* The addresses Income
+* Number of neighbours
+* Number of co-addresses
+* Number of successors (0 if no sending transaction within the current window)
+* If the address is a ransomeware (true/false)
+* Total transactions in a window
+* Number of white & ransome addresses in a window
 

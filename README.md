@@ -101,5 +101,6 @@ The program extracts the following features for each address, placed in a result
 * Total transactions in a window
 * Number of white & ransome addresses in a window
 
+The results/featureExtractionFinal.csv and results/featureExtraction.csv files are given in this branch for the 2015 and 2012 datasets, respectively.
 
 `The program should take approximately 30-40 minutes for the 2015 dataset, and 3 minutes for the 2012 dataset`

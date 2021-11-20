@@ -37,11 +37,11 @@ Some output could be provided as per testing.
 
 # Out of Memory ?
 
-Files are read entirely, one by one, and freed in-between. The more memory the better.
+This program is quiet memory intensive, particularily for Part A. The more memory the better.
 
 The largest file in the 2015 data-set is ~1.5GB.
 
-For 2015, you will need to set the heap size to 32768 MB.
+For 2015 in part A, you will need to set the heap size to 32768 MB. Part B will also require a larger heap size than the default one.
 
 Pass the command -Xmx32768m to the VM to do this.
 

@@ -113,3 +113,13 @@ The program extracts the following features for each address, placed in a result
 The results/featureExtractionFinal.csv and results/featureExtraction.csv files are given in this branch for the 2015 and 2012 datasets, respectively.
 
 `The program should take approximately 30-40 minutes for the 2015 dataset, and 3 minutes for the 2012 dataset`
+
+# Machine Learning Address Features (Part C)
+
+Our machine learning approach is given in RandomForest.py.
+
+Our resulting file is sorted in the order of the addresses year/day.
+
+This python program takes the extracted features and performs backtesting from the file.
+
+Since the file is already sorted by date, the time is simulated. As such, the java program does not need to be run for this part (Only the resulting sorted file is needed).
